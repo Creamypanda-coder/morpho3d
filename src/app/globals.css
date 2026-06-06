@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+:root {
+  --background: #020817;
+  --foreground: #f8fafc;
+  --font-sans: var(--font-inter, 'Inter', system-ui, sans-serif);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =====================
+   Custom scrollbar
+   ===================== */
+.custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: rgba(15,23,42,0.3); border-radius: 9999px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); border-radius: 9999px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.6); }
+
+/* =====================
+   Keyframe animations
+   ===================== */
+
+/* Fade in up */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Scale in */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Float gently */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* Shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* Glow pulse */
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.4; filter: blur(60px); }
+  50%       { opacity: 0.7; filter: blur(80px); }
+}
+
+/* Spin slow */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Step progress bar fill */
+@keyframes fillBar {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* Blink cursor */
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Number count up feel */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* =====================
+   Utility animation classes
+   ===================== */
+.animate-fade-in-up   { animation: fadeInUp 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+.animate-fade-in      { animation: fadeIn  0.6s ease both; }
+.animate-scale-in     { animation: scaleIn 0.6s cubic-bezier(0.22,1,0.36,1) both; }
+.animate-float        { animation: float 4s ease-in-out infinite; }
+.animate-float-slow   { animation: float 6s ease-in-out infinite; }
+.animate-glow-pulse   { animation: glowPulse 4s ease-in-out infinite; }
+.animate-spin-slow    { animation: spinSlow 20s linear infinite; }
+.animate-blink-cursor { animation: blinkCursor 1s step-end infinite; }
+.animate-slide-left   { animation: slideInLeft 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* Delay helpers */
+.delay-100  { animation-delay: 0.1s; }
+.delay-200  { animation-delay: 0.2s; }
+.delay-300  { animation-delay: 0.3s; }
+.delay-400  { animation-delay: 0.4s; }
+.delay-500  { animation-delay: 0.5s; }
+.delay-600  { animation-delay: 0.6s; }
+.delay-700  { animation-delay: 0.7s; }
+.delay-800  { animation-delay: 0.8s; }
+
+/* =====================
+   Shimmer gradient text
+   ===================== */
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    #67e8f9 0%,
+    #a78bfa 25%,
+    #f0abfc 50%,
+    #a78bfa 75%,
+    #67e8f9 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+/* =====================
+   Step connector line
+   ===================== */
+.step-connector {
+  position: absolute;
+  top: 28px;
+  left: calc(50% + 32px);
+  right: calc(-50% + 32px);
+  height: 1px;
+  background: linear-gradient(to right, #334155, transparent);
+}
+
+/* =====================
+   Glass card
+   ===================== */
+.glass-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* =====================
+   Motion demo UI elements
+   ===================== */
+.demo-screen {
+  border-radius: 16px;
+  background: #0a1628;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.08),
+    0 32px 64px -16px rgba(0, 0, 0, 0.6),
+    0 0 80px -20px rgba(99, 102, 241, 0.12);
+  overflow: hidden;
+}
+
+/* Step active glow */
+.step-active-glow {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), 0 0 24px rgba(99, 102, 241, 0.15);
+}
+
+/* Scrolled-into-view class (added via IntersectionObserver) */
+.in-view {
+  animation-play-state: running !important;
+}
+.out-view {
+  animation-play-state: paused !important;
+  opacity: 0;
+}

@@ -156,16 +156,21 @@ export default function Dashboard() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({ error: "3D generation failed" }));
         throw new Error(errorData.error || "3D generation failed");
       }
 
-      return res.json() as Promise<{ 
-        success: boolean; 
-        modelPath: string; 
-        modelUsed: string; 
-        fallbackTriggered: boolean; 
-      }>;
+      const blob = await res.blob();
+      const localModelUrl = URL.createObjectURL(blob);
+      const modelUsed = res.headers.get("x-model-used") || "stable-fast-3d";
+      const fallbackTriggered = res.headers.get("x-fallback-triggered") === "true";
+
+      return { 
+        success: true, 
+        modelPath: localModelUrl, 
+        modelUsed, 
+        fallbackTriggered 
+      };
     },
     onSuccess: (data) => {
       setModelPath(data.modelPath);

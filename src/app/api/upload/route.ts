@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import os from "os";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,21 +10,14 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    const base64 = buffer.toString("base64");
     
-    // Ensure the uploads directory exists in OS temp directory
-    const uploadsDir = path.join(os.tmpdir(), "morpho3d-uploads");
-    await mkdir(uploadsDir, { recursive: true });
-
-    // Sanitize the filename
-    const originalName = file.name || "input.png";
-    const sanitizedName = originalName.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const filePath = path.join(uploadsDir, sanitizedName);
-
-    await writeFile(filePath, buffer);
+    const mimeType = file.type || "image/png";
+    const dataUrl = `data:${mimeType};base64,${base64}`;
 
     return NextResponse.json({
       success: true,
-      imagePath: `/api/uploads/${sanitizedName}`,
+      imagePath: dataUrl,
     });
   } catch (error: any) {
     console.error("Upload error:", error);

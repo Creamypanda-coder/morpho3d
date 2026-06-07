@@ -103,53 +103,66 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing imagePath parameter" }, { status: 400 });
     }
 
-    // Resolve physical path (either from OS temp folder or public/uploads)
-    let absoluteImagePath = "";
-    let relativeImagePath = imagePath;
-    if (imagePath.startsWith("/api/uploads/")) {
-      const filename = imagePath.substring("/api/uploads/".length);
-      absoluteImagePath = path.join(os.tmpdir(), "morpho3d-uploads", filename);
+    let fileData: Buffer;
+    let filename = "input.png";
+    let mimeType = "image/png";
+
+    if (imagePath.startsWith("data:")) {
+      const match = imagePath.match(/^data:([^;]+);base64,(.+)$/);
+      if (!match) {
+        return NextResponse.json({ success: false, error: "Invalid image data format" }, { status: 400 });
+      }
+      mimeType = match[1];
+      const base64Data = match[2];
+      fileData = Buffer.from(base64Data, "base64");
+      
+      let ext = ".png";
+      if (mimeType === "image/jpeg") ext = ".jpg";
+      else if (mimeType === "image/webp") ext = ".webp";
+      filename = `input${ext}`;
     } else {
-      relativeImagePath = imagePath.replace(/^\//, "");
-      absoluteImagePath = path.join(process.cwd(), "public", relativeImagePath);
-    }
+      // Resolve physical path (either from OS temp folder or public/uploads)
+      let absoluteImagePath = "";
+      if (imagePath.startsWith("/api/uploads/")) {
+        const fname = imagePath.substring("/api/uploads/".length);
+        absoluteImagePath = path.join(os.tmpdir(), "morpho3d-uploads", fname);
+      } else {
+        const relativeImagePath = imagePath.replace(/^\//, "");
+        absoluteImagePath = path.join(process.cwd(), "public", relativeImagePath);
+      }
 
-    // Verify input file exists
-    try {
-      await fs.access(absoluteImagePath);
-    } catch {
-      return NextResponse.json(
-        { success: false, error: `Uploaded image file not found: ${imagePath}` },
-        { status: 404 }
-      );
-    }
+      // Verify input file exists
+      try {
+        await fs.access(absoluteImagePath);
+      } catch {
+        return NextResponse.json(
+          { success: false, error: `Uploaded image file not found: ${imagePath}` },
+          { status: 404 }
+        );
+      }
 
-    // Ensure generated directory exists in OS temp directory
-    const generatedDir = path.join(os.tmpdir(), "morpho3d-generated");
-    await fs.mkdir(generatedDir, { recursive: true });
-
-    // Output GLB path
-    const outputGlbPath = path.join(generatedDir, "model.glb");
-
-    // Clean up previous generated model to prevent loading old models
-    try {
-      await fs.unlink(outputGlbPath);
-    } catch {
-      // Ignore if file doesn't exist
+      fileData = await fs.readFile(absoluteImagePath);
+      filename = path.basename(absoluteImagePath);
+      
+      const ext = path.extname(absoluteImagePath).toLowerCase();
+      if (ext === ".jpg" || ext === ".jpeg") {
+        mimeType = "image/jpeg";
+      } else if (ext === ".webp") {
+        mimeType = "image/webp";
+      }
     }
 
     const hfToken = process.env.HF_TOKEN;
-    const fileData = await fs.readFile(absoluteImagePath);
 
     // Function to run Stable Fast 3D Pipeline
     const runStableFast3D = async () => {
       const spaceHost = "https://stabilityai-stable-fast-3d.hf.space";
-      console.log(`[API Generate] Initiating Stable Fast 3D pipeline for: ${relativeImagePath}`);
+      console.log(`[API Generate] Initiating Stable Fast 3D pipeline`);
 
       // 1. Upload the image file
-      const blob = new Blob([fileData], { type: "image/jpeg" });
+      const blob = new Blob([fileData as any], { type: mimeType });
       const formData = new FormData();
-      formData.append("files", blob, path.basename(absoluteImagePath));
+      formData.append("files", blob, filename);
 
       const uploadHeaders: Record<string, string> = {};
       if (hfToken) {
@@ -203,11 +216,11 @@ export async function POST(req: NextRequest) {
     // Function to run TripoSR Pipeline (Fallback)
     const runTripoSR = async () => {
       const spaceHost = "https://stabilityai-triposr.hf.space";
-      console.log(`[API Generate] Initiating TripoSR pipeline for: ${relativeImagePath}`);
+      console.log(`[API Generate] Initiating TripoSR pipeline`);
 
-      const blob = new Blob([fileData], { type: "image/jpeg" });
+      const blob = new Blob([fileData as any], { type: mimeType });
       const formData = new FormData();
-      formData.append("files", blob, path.basename(absoluteImagePath));
+      formData.append("files", blob, filename);
 
       const uploadHeaders: Record<string, string> = {};
       if (hfToken) {
@@ -274,21 +287,22 @@ export async function POST(req: NextRequest) {
       finalModelUrl = await runTripoSR();
     }
 
-    // Download and save GLB locally
-    console.log(`[API Generate] Downloading final model and saving to: ${outputGlbPath}`);
+    // Download final model
+    console.log(`[API Generate] Downloading final model from ${finalModelUrl}`);
     const downloadRes = await fetch(finalModelUrl);
     if (!downloadRes.ok) {
       throw new Error(`Failed to download model from ${finalModelUrl}: ${downloadRes.statusText}`);
     }
     const glbBuffer = await downloadRes.arrayBuffer();
-    await fs.writeFile(outputGlbPath, Buffer.from(glbBuffer));
-    console.log("[API Generate] Successfully saved final 3D model.");
+    console.log("[API Generate] Responding with GLB binary payload.");
 
-    return NextResponse.json({
-      success: true,
-      modelPath: `/api/generated/model.glb`,
-      modelUsed: selectedModel,
-      fallbackTriggered
+    return new NextResponse(glbBuffer, {
+      headers: {
+        "Content-Type": "model/gltf-binary",
+        "Cache-Control": "no-store, must-revalidate",
+        "x-model-used": selectedModel,
+        "x-fallback-triggered": String(fallbackTriggered),
+      },
     });
 
   } catch (error: any) {

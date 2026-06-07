@@ -11,33 +11,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing imagePath parameter" }, { status: 400 });
     }
 
-    // Resolve physical path (either from OS temp folder or public/uploads)
-    let physicalPath = "";
-    if (imagePath.startsWith("/api/uploads/")) {
-      const filename = imagePath.substring("/api/uploads/".length);
-      physicalPath = path.join(os.tmpdir(), "morpho3d-uploads", filename);
-    } else {
-      const sanitizedPath = imagePath.replace(/^\//, ""); // remove leading slash
-      physicalPath = path.join(process.cwd(), "public", sanitizedPath);
-    }
-
-    try {
-      await fs.access(physicalPath);
-    } catch {
-      return NextResponse.json({ success: false, error: `Image file not found on disk: ${imagePath}` }, { status: 404 });
-    }
-
-    // Read file and convert to base64
-    const fileBuffer = await fs.readFile(physicalPath);
-    const base64Image = fileBuffer.toString("base64");
-
-    // Determine MIME type
-    const ext = path.extname(physicalPath).toLowerCase();
+    let fileBuffer: Buffer;
+    let base64Image: string;
     let mimeType = "image/png";
-    if (ext === ".jpg" || ext === ".jpeg") {
-      mimeType = "image/jpeg";
-    } else if (ext === ".webp") {
-      mimeType = "image/webp";
+    let filename = "input.png";
+
+    if (imagePath.startsWith("data:")) {
+      const match = imagePath.match(/^data:([^;]+);base64,(.+)$/);
+      if (!match) {
+        return NextResponse.json({ success: false, error: "Invalid image data format" }, { status: 400 });
+      }
+      mimeType = match[1];
+      base64Image = match[2];
+      fileBuffer = Buffer.from(base64Image, "base64");
+      
+      let ext = ".png";
+      if (mimeType === "image/jpeg") ext = ".jpg";
+      else if (mimeType === "image/webp") ext = ".webp";
+      filename = `image${ext}`;
+    } else {
+      // Resolve physical path (either from OS temp folder or public/uploads)
+      let physicalPath = "";
+      if (imagePath.startsWith("/api/uploads/")) {
+        const fname = imagePath.substring("/api/uploads/".length);
+        physicalPath = path.join(os.tmpdir(), "morpho3d-uploads", fname);
+      } else {
+        const sanitizedPath = imagePath.replace(/^\//, ""); // remove leading slash
+        physicalPath = path.join(process.cwd(), "public", sanitizedPath);
+      }
+
+      try {
+        await fs.access(physicalPath);
+      } catch {
+        return NextResponse.json({ success: false, error: `Image file not found on disk: ${imagePath}` }, { status: 404 });
+      }
+
+      // Read file and convert to base64
+      fileBuffer = await fs.readFile(physicalPath);
+      base64Image = fileBuffer.toString("base64");
+      filename = path.basename(physicalPath);
+      
+      const ext = path.extname(physicalPath).toLowerCase();
+      if (ext === ".jpg" || ext === ".jpeg") {
+        mimeType = "image/jpeg";
+      } else if (ext === ".webp") {
+        mimeType = "image/webp";
+      }
     }
 
     // ==========================================
@@ -135,7 +154,7 @@ export async function POST(req: NextRequest) {
         {
           method: "POST",
           headers: hfHeaders,
-          body: fileBuffer,
+          body: fileBuffer as any,
           signal: AbortSignal.timeout(25000),
         }
       );
@@ -173,7 +192,6 @@ Image Description: ${caption}
     console.log("[Analyze] Using local image metadata analysis as final fallback...");
     
     const fileSizeKB = Math.round(fileBuffer.length / 1024);
-    const filename = path.basename(physicalPath);
 
     // Read image dimensions from buffer (for PNG/JPEG)
     let width = "unknown";

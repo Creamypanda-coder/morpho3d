@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
+import os from "os";
 
 async function runGradioEndpoint(spaceHost: string, fnIndex: number, data: any[], hfToken?: string): Promise<any[]> {
   const sessionHash = Math.random().toString(36).substring(2);
@@ -102,9 +103,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing imagePath parameter" }, { status: 400 });
     }
 
-    // Convert /uploads/filename to uploads/filename (relative to workspace root)
-    const relativeImagePath = imagePath.replace(/^\//, "");
-    const absoluteImagePath = path.join(process.cwd(), "public", relativeImagePath);
+    // Resolve physical path (either from OS temp folder or public/uploads)
+    let absoluteImagePath = "";
+    let relativeImagePath = imagePath;
+    if (imagePath.startsWith("/api/uploads/")) {
+      const filename = imagePath.substring("/api/uploads/".length);
+      absoluteImagePath = path.join(os.tmpdir(), "morpho3d-uploads", filename);
+    } else {
+      relativeImagePath = imagePath.replace(/^\//, "");
+      absoluteImagePath = path.join(process.cwd(), "public", relativeImagePath);
+    }
 
     // Verify input file exists
     try {
@@ -116,12 +124,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure generated directory exists
-    const generatedDir = path.join(process.cwd(), "public", "generated");
+    // Ensure generated directory exists in OS temp directory
+    const generatedDir = path.join(os.tmpdir(), "morpho3d-generated");
     await fs.mkdir(generatedDir, { recursive: true });
 
-    // Output GLB path (must be saved to public/generated/model.glb)
-    const outputGlbPath = path.join(process.cwd(), "public", "generated", "model.glb");
+    // Output GLB path
+    const outputGlbPath = path.join(generatedDir, "model.glb");
 
     // Clean up previous generated model to prevent loading old models
     try {
@@ -278,7 +286,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      modelPath: `/generated/model.glb`,
+      modelPath: `/api/generated/model.glb`,
       modelUsed: selectedModel,
       fallbackTriggered
     });

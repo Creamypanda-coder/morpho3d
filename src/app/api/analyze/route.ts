@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
+import os from "os";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,9 +11,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing imagePath parameter" }, { status: 400 });
     }
 
-    // Resolve physical path (imagePath starts with /uploads/)
-    const sanitizedPath = imagePath.replace(/^\//, ""); // remove leading slash
-    const physicalPath = path.join(process.cwd(), "public", sanitizedPath);
+    // Resolve physical path (either from OS temp folder or public/uploads)
+    let physicalPath = "";
+    if (imagePath.startsWith("/api/uploads/")) {
+      const filename = imagePath.substring("/api/uploads/".length);
+      physicalPath = path.join(os.tmpdir(), "morpho3d-uploads", filename);
+    } else {
+      const sanitizedPath = imagePath.replace(/^\//, ""); // remove leading slash
+      physicalPath = path.join(process.cwd(), "public", sanitizedPath);
+    }
 
     try {
       await fs.access(physicalPath);

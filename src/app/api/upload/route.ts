@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import os from "os";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,8 +14,8 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // Ensure the uploads directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    // Ensure the uploads directory exists in OS temp directory
+    const uploadsDir = path.join(os.tmpdir(), "morpho3d-uploads");
     await mkdir(uploadsDir, { recursive: true });
 
     // Sanitize the filename
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      imagePath: `/uploads/${sanitizedName}`,
+      imagePath: `/api/uploads/${sanitizedName}`,
     });
   } catch (error: any) {
     console.error("Upload error:", error);

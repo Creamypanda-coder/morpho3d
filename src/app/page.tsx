@@ -86,9 +86,9 @@ function MotionDemo() {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto">
       {/* Step selectors */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-10">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
         {steps.map((s, i) => {
           const Icon = s.icon;
           const isActive = active === i;
@@ -96,27 +96,27 @@ function MotionDemo() {
             <button
               key={i}
               onClick={() => { setActive(i); setProgress(0); }}
-              className={`flex-1 flex items-center gap-3 px-5 py-4 rounded-2xl border text-left transition-all duration-500 ${
+              className={`flex-1 flex items-center gap-2.5 px-4 py-3 rounded-xl border text-left transition-all duration-500 ${
                 isActive
-                  ? "border-indigo-500/40 bg-indigo-950/30 shadow-lg shadow-indigo-500/10"
+                  ? "border-indigo-500/45 bg-indigo-950/40 shadow-md shadow-indigo-500/10"
                   : "border-gray-800/60 bg-gray-900/20 hover:border-gray-700 hover:bg-gray-900/40"
               }`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${s.color} ${isActive ? "shadow-lg" : "opacity-50"} transition-all duration-500`}>
-                <Icon className="w-5 h-5 text-white" />
+              <div className={`w-8.5 h-8.5 rounded-lg flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${s.color} ${isActive ? "shadow-md" : "opacity-40"} transition-all duration-500`}>
+                <Icon className="w-4 h-4 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-bold font-mono tracking-widest ${isActive ? "text-indigo-400" : "text-gray-600"}`}>
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-[9px] font-bold font-mono tracking-wider ${isActive ? "text-indigo-400" : "text-gray-600"}`}>
                     {s.num}
                   </span>
                   {isActive && (
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[8px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-1 py-0.2 rounded-full">
                       LIVE
                     </span>
                   )}
                 </div>
-                <p className={`text-sm font-semibold mt-0.5 ${isActive ? "text-white" : "text-gray-500"}`}>
+                <p className={`text-[12px] font-semibold mt-0.5 ${isActive ? "text-white" : "text-gray-500"}`}>
                   {s.label}
                 </p>
               </div>
@@ -435,7 +435,6 @@ const FEATURES = [
    ───────────────────────────────────────────── */
 export default function LandingPage() {
   const heroSection  = useInView(0.1);
-  const howSection   = useInView(0.1);
   const featSection  = useInView(0.1);
 
   return (
@@ -502,99 +501,73 @@ export default function LandingPage() {
       </header>
 
       {/* ══════════════════════════════
-          HERO
-         ══════════════════════════════ */}
-      <section
-        ref={heroSection.ref}
-        className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-28 pb-24"
-      >
-        {/* Badge */}
-        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/20 bg-cyan-950/30 text-cyan-300 text-xs font-semibold mb-8 ${heroSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
-          <Sparkles className="w-3.5 h-3.5" />
-          AI-Powered · Image to 3D · Free & Local
-        </div>
-
-        {/* Headline */}
-        <h1 className={`text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] max-w-4xl mb-7 ${heroSection.inView ? "animate-fade-in-up delay-100" : "opacity-0"}`}>
-          Turn any photo into a{" "}
-          <br className="hidden md:block" />
-          <span className="text-shimmer">3D model</span>
-          {" "}in seconds
-        </h1>
-
-        {/* Sub */}
-        <p className={`text-gray-400 text-lg md:text-xl max-w-2xl leading-relaxed mb-12 ${heroSection.inView ? "animate-fade-in-up delay-200" : "opacity-0"}`}>
-          Upload an image. AI reads it. Stable Fast 3D reconstructs it.
-          <br />
-          Download your GLB. Runs entirely on your machine.
-        </p>
-
-        {/* CTA buttons */}
-        <div className={`flex flex-col sm:flex-row items-center gap-4 mb-20 ${heroSection.inView ? "animate-fade-in-up delay-300" : "opacity-0"}`}>
-          <Link
-            href="/dashboard"
-            className="group relative flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-base text-white bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-500 shadow-2xl shadow-indigo-500/20 hover:shadow-indigo-500/35 transition-all duration-300 hover:-translate-y-0.5"
-          >
-            <span>Launch Generator</span>
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            {/* Shimmer sweep */}
-            <span className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-              <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            </span>
-          </Link>
-          <a
-            href="#how-it-works"
-            className="flex items-center gap-2 px-6 py-4 rounded-2xl font-semibold text-sm text-gray-300 border border-gray-800 hover:border-gray-600 hover:text-white hover:bg-white/5 transition-all"
-          >
-            See how it works
-            <ChevronDown className="w-4 h-4" />
-          </a>
-        </div>
-
-        {/* Hero stat strip */}
-        <div className={`flex flex-wrap justify-center gap-x-10 gap-y-4 ${heroSection.inView ? "animate-fade-in-up delay-400" : "opacity-0"}`}>
-          {[
-            { val: "< 30s", label: "Average generation time" },
-            { val: "GLB",   label: "Industry-standard output" },
-            { val: "Free",  label: "No credits, no signup" },
-            { val: "Local", label: "100% private processing" },
-          ].map((s) => (
-            <div key={s.val} className="flex flex-col items-center gap-0.5">
-              <span className="text-2xl font-extrabold text-white">{s.val}</span>
-              <span className="text-[11px] text-gray-500">{s.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════════════════════
-          HOW IT WORKS — Motion Demo
+          HERO SECTION (2 COLUMNS)
          ══════════════════════════════ */}
       <section
         id="how-it-works"
-        ref={howSection.ref}
-        className="relative z-10 px-6 py-28"
+        ref={heroSection.ref}
+        className="relative z-10 max-w-7xl mx-auto px-6 pt-16 lg:pt-24 pb-20 w-full"
       >
-        <div className="max-w-6xl mx-auto">
-          {/* Section label */}
-          <div className={`text-center mb-16 ${howSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
-            <p className="text-xs font-bold tracking-widest text-indigo-400 uppercase mb-3 font-mono">
-              How it works
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          {/* Left Column: Title & Info */}
+          <div className="lg:col-span-5 flex flex-col items-start text-left">
+            {/* Badge */}
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-950/30 text-cyan-300 text-xs font-semibold mb-6 ${heroSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
+              <Sparkles className="w-3.5 h-3.5" />
+              AI-Powered · Image to 3D · Free & Local
+            </div>
+
+            {/* Headline */}
+            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-white mb-6 ${heroSection.inView ? "animate-fade-in-up delay-100" : "opacity-0"}`}>
+              Turn any photo into a <span className="text-shimmer">3D model</span> in seconds
+            </h1>
+
+            {/* Sub */}
+            <p className={`text-gray-400 text-sm md:text-base leading-relaxed mb-8 max-w-lg ${heroSection.inView ? "animate-fade-in-up delay-200" : "opacity-0"}`}>
+              Upload an image. AI reads shape and depth cues. Stable Fast 3D reconstructs a full GLB — ready to rotate, inspect, and download.
             </p>
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
-              Three steps.{" "}
-              <span className="bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-transparent">
-                One result.
-              </span>
-            </h2>
-            <p className="text-gray-400 text-base max-w-xl mx-auto">
-              Watch the pipeline run in real time — from raw photo to interactive 3D asset.
-            </p>
+
+            {/* CTA buttons */}
+            <div className={`flex flex-row items-center gap-3 w-full mb-10 ${heroSection.inView ? "animate-fade-in-up delay-300" : "opacity-0"}`}>
+              <Link
+                href="/dashboard"
+                className="group relative flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-500 shadow-xl shadow-indigo-500/15 hover:shadow-indigo-500/25 transition-all duration-300 hover:-translate-y-0.5"
+              >
+                <span>Launch Workstation</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                </span>
+              </Link>
+              <a
+                href="#features"
+                className="flex items-center gap-1 px-4 py-3.5 rounded-xl font-semibold text-xs text-gray-400 border border-gray-800 hover:border-gray-600 hover:text-white hover:bg-white/5 transition-all"
+              >
+                Features
+              </a>
+            </div>
+
+            {/* Hero stats */}
+            <div className={`grid grid-cols-2 gap-x-8 gap-y-4 border-t border-white/[0.05] pt-8 w-full ${heroSection.inView ? "animate-fade-in-up delay-400" : "opacity-0"}`}>
+              {[
+                { val: "< 30s", label: "Reconstruction time" },
+                { val: "GLB",   label: "Standard 3D format" },
+                { val: "Free",  label: "Unlimited local use" },
+                { val: "Private", label: "Processing stays local" },
+              ].map((s) => (
+                <div key={s.label} className="flex flex-col">
+                  <span className="text-xl font-extrabold text-white">{s.val}</span>
+                  <span className="text-[10px] text-gray-500 font-mono tracking-wide uppercase mt-0.5">{s.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Interactive motion demo */}
-          <div className={howSection.inView ? "animate-scale-in delay-200" : "opacity-0"}>
-            <MotionDemo />
+          {/* Right Column: Motion Design Demo */}
+          <div className="lg:col-span-7 w-full">
+            <div className={heroSection.inView ? "animate-scale-in delay-200" : "opacity-0"}>
+              <MotionDemo />
+            </div>
           </div>
         </div>
       </section>

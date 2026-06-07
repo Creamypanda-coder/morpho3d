@@ -361,7 +361,6 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
         downloadBlob(blob, "turntable.gif", "image/gif");
         res();
       });
-      gif.on("error", rej);
       gif.render();
     });
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import React, {
-  useState, useRef, useEffect, Suspense, useCallback, useImperativeHandle, forwardRef
+  useState, useRef, useEffect, Suspense, useCallback
 } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
@@ -10,7 +10,6 @@ import {
   Rotate3d, RefreshCw, Grid3X3, Eye, EyeOff,
   Maximize2, Minimize2, Activity, AlertTriangle, Download
 } from "lucide-react";
-import ExportPanel, { type ExportHandlers } from "./ExportPanel";
 
 /* ─── Error Boundary ─── */
 class CanvasErrorBoundary extends React.Component<
@@ -37,32 +36,6 @@ function CameraFramer({ modelBox, controlsRef }: { modelBox: THREE.Box3 | null; 
   }, [modelBox, camera, controlsRef]);
   return null;
 }
-
-/* ─── Export Bridge ─── */
-// Lives inside Canvas so it can access useThree
-export interface ExportBridgeHandle {
-  captureFrame(w?: number, h?: number): string;
-  getRenderer(): THREE.WebGLRenderer;
-  getCamera(): THREE.Camera;
-  getScene(): THREE.Scene;
-}
-
-const ExportBridge = forwardRef<ExportBridgeHandle>(function ExportBridge(_, ref) {
-  const { gl, camera, scene } = useThree();
-  useImperativeHandle(ref, () => ({
-    captureFrame(w = 0, h = 0) {
-      if (w && h) {
-        gl.setSize(w, h);
-        gl.render(scene, camera);
-      }
-      return gl.domElement.toDataURL("image/png");
-    },
-    getRenderer() { return gl; },
-    getCamera() { return camera; },
-    getScene() { return scene; },
-  }));
-  return null;
-});
 
 /* ─── AutoStand ─── */
 const AutoStand = ({
@@ -109,21 +82,6 @@ const AutoStand = ({
   return <primitive object={scene} dispose={null} />;
 };
 
-/* ─────────────────────────────────────────────────────
-   Download helpers
-   ───────────────────────────────────────────────────── */
-function downloadBlob(data: BlobPart, filename: string, mime: string) {
-  const blob = new Blob([data], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-}
-function downloadDataURL(dataURL: string, filename: string) {
-  const a = document.createElement("a"); a.href = dataURL; a.download = filename;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
-
 /* ─── Main ModelViewer ─── */
 interface ModelViewerProps { modelPath: string; }
 
@@ -135,12 +93,9 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
   const [loading,       setLoading]       = useState(true);
   const [loadingError,  setLoadingError]  = useState<string | null>(null);
   const [modelBox,      setModelBox]      = useState<THREE.Box3 | null>(null);
-  const [showExport,    setShowExport]    = useState(false);
-  const [exportProgress, setExportProgress] = useState("");
 
   const containerRef   = useRef<HTMLDivElement>(null);
   const controlsRef    = useRef<any>(null);
-  const exportBridgeRef = useRef<ExportBridgeHandle>(null);
   const modelSceneRef  = useRef<THREE.Group | null>(null);
 
   /* fullscreen sync */
@@ -152,7 +107,7 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
 
   /* model path change → reset */
   useEffect(() => {
-    setLoading(true); setLoadingError(null); setModelBox(null); setShowExport(false);
+    setLoading(true); setLoadingError(null); setModelBox(null);
     try { useGLTF.clear(modelPath); } catch {}
   }, [modelPath]);
 
@@ -176,203 +131,16 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     document.fullscreenElement ? document.exitFullscreen() : containerRef.current.requestFullscreen().catch(console.error);
   };
 
-  /* ────────────────────────────────────────────
-     EXPORT HANDLERS
-     ──────────────────────────────────────────── */
-
-  /* 3-D mesh exports via Three.js exporters */
-  const exportGLB = async () => {
-    const scene = modelSceneRef.current; if (!scene) throw new Error("No model loaded");
-    const { GLTFExporter } = await import("three/examples/jsm/exporters/GLTFExporter.js" as any);
-    return new Promise<void>((res, rej) => {
-      new GLTFExporter().parse(scene, (buf: ArrayBuffer) => {
-        downloadBlob(buf, "model.glb", "model/gltf-binary"); res();
-      }, rej, { binary: true });
-    });
+  const handleDownloadGLB = () => {
+    if (!modelPath) return;
+    const a = document.createElement("a");
+    a.href = modelPath;
+    a.download = "model.glb";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
-  const exportGLTF = async () => {
-    const scene = modelSceneRef.current; if (!scene) throw new Error("No model loaded");
-    const { GLTFExporter } = await import("three/examples/jsm/exporters/GLTFExporter.js" as any);
-    return new Promise<void>((res, rej) => {
-      new GLTFExporter().parse(scene, (json: object) => {
-        downloadBlob(JSON.stringify(json, null, 2), "model.gltf", "model/gltf+json"); res();
-      }, rej, { binary: false });
-    });
-  };
-
-  const exportOBJ = async () => {
-    const scene = modelSceneRef.current; if (!scene) throw new Error("No model loaded");
-    const { OBJExporter } = await import("three/examples/jsm/exporters/OBJExporter.js" as any);
-    const obj = new OBJExporter().parse(scene);
-    downloadBlob(obj, "model.obj", "text/plain");
-  };
-
-  const exportSTL = async () => {
-    const scene = modelSceneRef.current; if (!scene) throw new Error("No model loaded");
-    const { STLExporter } = await import("three/examples/jsm/exporters/STLExporter.js" as any);
-    const stl = new STLExporter().parse(scene, { binary: true });
-    downloadBlob(stl, "model.stl", "application/octet-stream");
-  };
-
-  const exportPLY = async () => {
-    const scene = modelSceneRef.current; if (!scene) throw new Error("No model loaded");
-    const { PLYExporter } = await import("three/examples/jsm/exporters/PLYExporter.js" as any);
-    return new Promise<void>((res) => {
-      new PLYExporter().parse(scene, (result: ArrayBuffer | string) => {
-        downloadBlob(result, "model.ply", "application/octet-stream"); res();
-      }, { binary: true });
-    });
-  };
-
-  const exportUSDZ = async () => {
-    const scene = modelSceneRef.current;
-    const bridge = exportBridgeRef.current;
-    if (!scene || !bridge) throw new Error("No model loaded");
-    const { USDZExporter } = await import("three/examples/jsm/exporters/USDZExporter.js" as any);
-    const renderer = bridge.getRenderer();
-    const exporter = new USDZExporter();
-    const usdz = await exporter.parseAsync(scene, { ar: { anchoring: { type: "plane" } } });
-    downloadBlob(usdz, "model.usdz", "model/vnd.usdz+zip");
-  };
-
-  /* Image exports */
-  const exportPNG = () => {
-    const bridge = exportBridgeRef.current; if (!bridge) throw new Error("Bridge not ready");
-    const dataURL = bridge.captureFrame();
-    downloadDataURL(dataURL, "model-render.png");
-  };
-
-  const exportJPEG = () => {
-    const bridge = exportBridgeRef.current; if (!bridge) throw new Error("Bridge not ready");
-    const renderer = bridge.getRenderer();
-    const camera = bridge.getCamera();
-    const scene = bridge.getScene();
-    renderer.render(scene, camera);
-    const dataURL = renderer.domElement.toDataURL("image/jpeg", 0.95);
-    downloadDataURL(dataURL, "model-render.jpg");
-  };
-
-  const exportPNG4K = async () => {
-    const bridge = exportBridgeRef.current; if (!bridge) throw new Error("Bridge not ready");
-    const renderer = bridge.getRenderer();
-    const camera   = bridge.getCamera() as THREE.PerspectiveCamera;
-    const scene    = bridge.getScene();
-    const origW = renderer.domElement.width;
-    const origH = renderer.domElement.height;
-    const target = 2048;
-    renderer.setSize(target, target);
-    camera.aspect = 1; camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
-    const dataURL = renderer.domElement.toDataURL("image/png");
-    renderer.setSize(origW, origH);
-    camera.aspect = origW / origH; camera.updateProjectionMatrix();
-    downloadDataURL(dataURL, "model-4k.png");
-  };
-
-  /* WebM turntable */
-  const exportWebM = async () => {
-    const bridge = exportBridgeRef.current; if (!bridge) throw new Error("Bridge not ready");
-    const canvas = bridge.getRenderer().domElement;
-    if (!(canvas as any).captureStream) throw new Error("captureStream not supported in this browser");
-
-    const stream = (canvas as any).captureStream(30);
-    const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
-      ? "video/webm;codecs=vp9" : "video/webm";
-    const recorder = new MediaRecorder(stream, { mimeType: mime });
-    const chunks: BlobPart[] = [];
-
-    return new Promise<void>((res, rej) => {
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-      recorder.onerror = rej;
-      recorder.onstop = () => {
-        downloadBlob(new Blob(chunks, { type: "video/webm" }), "turntable.webm", "video/webm");
-        // restore autoRotate
-        if (controlsRef.current) controlsRef.current.autoRotate = autoRotate;
-        res();
-      };
-
-      // Force rotation for 5 seconds at 72°/sec
-      if (controlsRef.current) {
-        controlsRef.current.autoRotate = true;
-        controlsRef.current.autoRotateSpeed = 3.0;
-      }
-      recorder.start();
-      setTimeout(() => recorder.stop(), 5000);
-    });
-  };
-
-  /* Animated GIF turntable */
-  const exportGIF = async () => {
-    const bridge = exportBridgeRef.current;
-    const controls = controlsRef.current;
-    if (!bridge || !controls) throw new Error("Bridge not ready");
-
-    const renderer = bridge.getRenderer();
-    const camera   = bridge.getCamera();
-    const scene    = bridge.getScene();
-
-    // @ts-ignore
-    const GIF = (await import("gif.js")).default;
-
-    const W = Math.min(renderer.domElement.width,  480);
-    const H = Math.min(renderer.domElement.height, 480);
-
-    const gif = new GIF({
-      workers: 4,
-      quality: 8,
-      width: W,
-      height: H,
-      workerScript: "/gif.worker.js",
-      repeat: 0, // loop forever
-    });
-
-    const FRAMES = 36;       // 360° / 10° per frame
-    const DELAY  = 80;       // ms between frames (≈12 fps)
-    const savedAR = controls.autoRotate;
-    controls.autoRotate = false;
-
-    // Save current azimuth
-    const savedAzimuth = controls.getAzimuthalAngle?.() ?? 0;
-
-    // Offscreen canvas for downscaling
-    const offscreen = document.createElement("canvas");
-    offscreen.width = W; offscreen.height = H;
-    const ctx = offscreen.getContext("2d")!;
-
-    for (let i = 0; i < FRAMES; i++) {
-      // Rotate by one step
-      if (controls.setAzimuthalAngle) {
-        controls.setAzimuthalAngle(savedAzimuth + (i / FRAMES) * Math.PI * 2);
-        controls.update();
-      }
-
-      renderer.render(scene, camera);
-
-      // Downscale to offscreen canvas
-      ctx.drawImage(renderer.domElement, 0, 0, W, H);
-      gif.addFrame(ctx, { copy: true, delay: DELAY });
-    }
-
-    controls.autoRotate = savedAR;
-
-    return new Promise<void>((res, rej) => {
-      gif.on("finished", (blob: Blob) => {
-        downloadBlob(blob, "turntable.gif", "image/gif");
-        res();
-      });
-      gif.render();
-    });
-  };
-
-  const exportHandlers: ExportHandlers = {
-    exportGLB, exportGLTF, exportOBJ, exportSTL, exportPLY, exportUSDZ,
-    exportPNG, exportJPEG, exportPNG4K, exportWebM, exportGIF,
-  };
-
-  /* ─────────────────────────────────────────────
-     RENDER
-     ───────────────────────────────────────────── */
   return (
     <div
       ref={containerRef}
@@ -408,11 +176,6 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
         </div>
       )}
 
-      {/* Export Panel (overlay) */}
-      {showExport && (
-        <ExportPanel onClose={() => setShowExport(false)} handlers={exportHandlers} />
-      )}
-
       {/* Canvas */}
       <div className="flex-1 w-full relative">
         <CanvasErrorBoundary onError={(e) => { setLoadingError(e); setLoading(false); }}>
@@ -440,7 +203,6 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
             </Suspense>
 
             <CameraFramer modelBox={modelBox} controlsRef={controlsRef} />
-            <ExportBridge ref={exportBridgeRef} />
 
             {showGrid && <gridHelper args={[30, 40, "#374151", "#1f2937"]} position={[0, 0, 0]} />}
 
@@ -479,18 +241,14 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
         {/* Divider */}
         <div className="w-px h-5 bg-gray-700/60 mx-0.5" />
 
-        {/* Export button */}
+        {/* Download GLB button */}
         <button
-          onClick={() => setShowExport(!showExport)}
-          title="Export Model"
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all ${
-            showExport
-              ? "text-white bg-gradient-to-r from-cyan-500/30 to-violet-500/30 border border-cyan-500/30"
-              : "text-gray-300 hover:text-white hover:bg-gray-800/80 border border-transparent"
-          }`}
+          onClick={handleDownloadGLB}
+          title="Download GLB"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold text-gray-300 hover:text-white hover:bg-gray-800/80 border border-transparent transition-all"
         >
           <Download className="w-3.5 h-3.5" />
-          Export
+          Download GLB
         </button>
 
         <button onClick={handleToggleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}

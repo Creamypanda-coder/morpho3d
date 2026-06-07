@@ -466,10 +466,7 @@ export default function LandingPage() {
               <Box className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} />
             </div>
             <span className="font-bold text-[17px] tracking-tight">
-              <span className="text-shimmer">Image2Model</span>
-              <span className="ml-2 text-[11px] font-medium text-gray-500 bg-gray-900 border border-gray-800 px-2 py-0.5 rounded-md align-middle">
-                Local
-              </span>
+              <span className="text-shimmer">Toms 3D Generator</span>
             </span>
           </div>
 
@@ -689,10 +686,10 @@ export default function LandingPage() {
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center">
               <Box className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-sm font-bold text-gray-400">Image2Model Local</span>
+            <span className="text-sm font-bold text-gray-400">Toms 3D Generator</span>
           </div>
           <p className="text-xs text-gray-600">
-            © 2026 · Built with Next.js, Three.js &amp; Stable Fast 3D · Runs entirely on localhost
+            © 2026 · Built with Next.js, Three.js &amp; Stable Fast 3D · Created by Toms
           </p>
         </div>
       </footer>

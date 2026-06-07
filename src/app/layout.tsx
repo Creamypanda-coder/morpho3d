@@ -20,8 +20,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Image2Model Local - AI-Powered 3D Model Generator",
-  description: "Convert images (PNG, JPG, WEBP) to 3D GLB models locally using InstantMesh and OpenAI Vision.",
+  title: "Toms 3D Generator - AI-Powered Image to 3D",
+  description: "Convert images (PNG, JPG, WEBP) to 3D GLB models instantly. Built by Toms.",
 };
 
 export default function RootLayout({

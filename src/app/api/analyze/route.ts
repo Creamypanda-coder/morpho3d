@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       let physicalPath = "";
       if (imagePath.startsWith("/api/uploads/")) {
         const fname = imagePath.substring("/api/uploads/".length);
-        physicalPath = path.join(os.tmpdir(), "morpho3d-uploads", fname);
+        physicalPath = path.join(os.tmpdir(), "toms3d-uploads", fname);
       } else {
         const sanitizedPath = imagePath.replace(/^\//, ""); // remove leading slash
         physicalPath = path.join(process.cwd(), "public", sanitizedPath);

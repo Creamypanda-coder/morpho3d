@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
       let absoluteImagePath = "";
       if (imagePath.startsWith("/api/uploads/")) {
         const fname = imagePath.substring("/api/uploads/".length);
-        absoluteImagePath = path.join(os.tmpdir(), "morpho3d-uploads", fname);
+        absoluteImagePath = path.join(os.tmpdir(), "toms3d-uploads", fname);
       } else {
         const relativeImagePath = imagePath.replace(/^\//, "");
         absoluteImagePath = path.join(process.cwd(), "public", relativeImagePath);

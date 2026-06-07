@@ -101,9 +101,28 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
 
   /* fullscreen sync */
   useEffect(() => {
-    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    const onChange = () => {
+      // Defer state update to ensure browser has fully updated the fullscreenElement
+      setTimeout(() => {
+        const isFull = !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).mozFullScreenElement ||
+          (document as any).msFullscreenElement
+        );
+        setIsFullscreen(isFull);
+      }, 50);
+    };
     document.addEventListener("fullscreenchange", onChange);
-    return () => document.removeEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    document.addEventListener("mozfullscreenchange", onChange);
+    document.addEventListener("MSFullscreenChange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+      document.removeEventListener("mozfullscreenchange", onChange);
+      document.removeEventListener("MSFullscreenChange", onChange);
+    };
   }, []);
 
   /* Force Canvas resize recalculation on fullscreen state toggle */
@@ -139,7 +158,29 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
 
   const handleToggleFullscreen = () => {
     if (!containerRef.current) return;
-    document.fullscreenElement ? document.exitFullscreen() : containerRef.current.requestFullscreen().catch(console.error);
+    const doc = document as any;
+    const el = containerRef.current as any;
+    
+    const isFull = !!(
+      doc.fullscreenElement ||
+      doc.webkitFullscreenElement ||
+      doc.mozFullScreenElement ||
+      doc.msFullscreenElement
+    );
+
+    if (isFull) {
+      if (doc.exitFullscreen) doc.exitFullscreen();
+      else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+      else if (doc.mozCancelFullScreen) doc.mozCancelFullScreen();
+      else if (doc.msExitFullscreen) doc.msExitFullscreen();
+      setIsFullscreen(false);
+    } else {
+      const requestFS = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+      if (requestFS) {
+        requestFS.call(el).catch(console.error);
+        setIsFullscreen(true);
+      }
+    }
   };
 
   const handleDownloadGLB = () => {
@@ -162,8 +203,10 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full rounded-2xl overflow-hidden border shadow-2xl flex flex-col transition-colors duration-350 ${bgClasses[bgColor]} ${
-        isFullscreen ? "!h-screen !w-screen !rounded-none !border-none" : ""
+      className={`overflow-hidden shadow-2xl flex flex-col transition-all duration-350 ${bgClasses[bgColor]} ${
+        isFullscreen 
+          ? "fixed inset-0 z-50 w-screen h-screen rounded-none border-none" 
+          : "relative w-full h-full rounded-2xl border"
       }`}
     >
       {/* Loading */}

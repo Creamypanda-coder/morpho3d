@@ -280,7 +280,7 @@ export default function Dashboard() {
       <main style={{ flex: 1, minHeight: 0, display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: "1rem", padding: "1rem", overflow: "hidden" }}>
         
         {/* Left Panel: Controls */}
-        <section style={{ minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.75rem" }} className="custom-scrollbar pr-1">
+        <section style={{ minHeight: 0, minWidth: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.75rem" }} className="custom-scrollbar pr-1">
           
           {/* Card 1: Upload & Preview */}
           <div className="p-4 rounded-2xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
@@ -479,7 +479,7 @@ export default function Dashboard() {
         </section>
 
         {/* Right Panel: 3D Viewer */}
-        <section style={{ minHeight: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <section style={{ minHeight: 0, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <div className="flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
               <Box className="w-4 h-4 text-cyan-400" />

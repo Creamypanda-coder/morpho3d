@@ -93,6 +93,7 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
   const [loading,       setLoading]       = useState(true);
   const [loadingError,  setLoadingError]  = useState<string | null>(null);
   const [modelBox,      setModelBox]      = useState<THREE.Box3 | null>(null);
+  const [bgColor,       setBgColor]       = useState<"dark" | "black" | "gray" | "white">("dark");
 
   const containerRef   = useRef<HTMLDivElement>(null);
   const controlsRef    = useRef<any>(null);
@@ -104,6 +105,16 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
+
+  /* Force Canvas resize recalculation on fullscreen state toggle */
+  useEffect(() => {
+    window.dispatchEvent(new Event("resize"));
+    // A small timeout ensures the container has fully finished CSS transitions
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [isFullscreen]);
 
   /* model path change → reset */
   useEffect(() => {
@@ -141,10 +152,17 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     document.body.removeChild(a);
   };
 
+  const bgClasses = {
+    dark: "bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800 text-gray-100",
+    black: "bg-black border-gray-900 text-gray-100",
+    gray: "bg-gray-800 border-gray-700 text-gray-100",
+    white: "bg-white border-gray-200 text-gray-900",
+  };
+
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-full bg-gradient-to-b from-gray-950 to-gray-900 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl flex flex-col ${
+      className={`relative w-full h-full rounded-2xl overflow-hidden border shadow-2xl flex flex-col transition-colors duration-350 ${bgClasses[bgColor]} ${
         isFullscreen ? "!h-screen !w-screen !rounded-none !border-none" : ""
       }`}
     >
@@ -189,7 +207,7 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
 
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
               <planeGeometry args={[60, 60]} />
-              <shadowMaterial opacity={0.3} />
+              <shadowMaterial opacity={bgColor === "white" ? 0.15 : 0.3} />
             </mesh>
 
             <Suspense fallback={null}>
@@ -204,7 +222,18 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
 
             <CameraFramer modelBox={modelBox} controlsRef={controlsRef} />
 
-            {showGrid && <gridHelper args={[30, 40, "#374151", "#1f2937"]} position={[0, 0, 0]} />}
+            {showGrid && (
+              <gridHelper 
+                args={
+                  bgColor === "white" 
+                    ? [30, 40, "#9ca3af", "#d1d5db"] 
+                    : bgColor === "gray"
+                    ? [30, 40, "#9ca3af", "#4b5563"]
+                    : [30, 40, "#374151", "#1f2937"]
+                } 
+                position={[0, 0, 0]} 
+              />
+            )}
 
             <OrbitControls
               ref={controlsRef}
@@ -238,6 +267,42 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
           {showGrid ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>
 
+        {/* Color Palette Inline */}
+        <div className="flex items-center gap-1.5 px-2">
+          <button
+            onClick={() => setBgColor("dark")}
+            title="Dark Background"
+            className={`w-3.5 h-3.5 rounded-full border transition-all ${
+              bgColor === "dark" ? "border-cyan-400 scale-110 shadow-lg" : "border-gray-700 hover:border-gray-500"
+            }`}
+            style={{ background: "linear-gradient(to bottom, #030712, #111827)" }}
+          />
+          <button
+            onClick={() => setBgColor("black")}
+            title="Black Background"
+            className={`w-3.5 h-3.5 rounded-full border transition-all ${
+              bgColor === "black" ? "border-cyan-400 scale-110 shadow-lg" : "border-gray-700 hover:border-gray-500"
+            }`}
+            style={{ backgroundColor: "#000000" }}
+          />
+          <button
+            onClick={() => setBgColor("gray")}
+            title="Gray Background"
+            className={`w-3.5 h-3.5 rounded-full border transition-all ${
+              bgColor === "gray" ? "border-cyan-400 scale-110 shadow-lg" : "border-gray-700 hover:border-gray-500"
+            }`}
+            style={{ backgroundColor: "#4b5563" }}
+          />
+          <button
+            onClick={() => setBgColor("white")}
+            title="White Background"
+            className={`w-3.5 h-3.5 rounded-full border transition-all ${
+              bgColor === "white" ? "border-cyan-400 scale-110 shadow-lg" : "border-gray-400 hover:border-gray-600"
+            }`}
+            style={{ backgroundColor: "#ffffff" }}
+          />
+        </div>
+
         {/* Divider */}
         <div className="w-px h-5 bg-gray-700/60 mx-0.5" />
 
@@ -258,7 +323,11 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
       </div>
 
       {/* Help tip */}
-      <div className="absolute top-4 left-4 pointer-events-none text-xs text-gray-500 bg-gray-950/40 border border-gray-900/40 backdrop-blur-md px-3 py-1.5 rounded-lg z-10 select-none">
+      <div className={`absolute top-4 left-4 pointer-events-none text-xs backdrop-blur-md px-3 py-1.5 rounded-lg z-10 select-none ${
+        bgColor === "white" 
+          ? "text-gray-600 bg-white/80 border border-gray-200 shadow-sm" 
+          : "text-gray-500 bg-gray-950/40 border border-gray-900/40"
+      }`}>
         Drag to Rotate • Scroll to Zoom • Right-click to Pan
       </div>
     </div>

@@ -454,7 +454,6 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
               dampingFactor={0.05}
               minDistance={0.5}
               maxDistance={20}
-              maxPolarAngle={Math.PI / 2.05}
             />
           </Canvas>
         </CanvasErrorBoundary>

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight, Box, Cpu, Sparkles, Orbit, Download,
-  Upload, Scan, Layers, MousePointer, ChevronDown, Zap
+  Upload, Scan, Layers, MousePointer, ChevronDown, Zap,
+  Globe, Link2, Mail, Phone, MapPin, ExternalLink, Code
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────
@@ -461,6 +462,7 @@ const FEATURES = [
 export default function LandingPage() {
   const heroSection  = useInView(0.1);
   const featSection  = useInView(0.1);
+  const aboutSection = useInView(0.1);
 
   return (
     <div className="relative min-h-screen flex flex-col bg-black overflow-x-hidden">
@@ -514,7 +516,7 @@ export default function LandingPage() {
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
-            {["How it Works", "Features"].map((label) => (
+            {["How it Works", "Features", "About"].map((label) => (
               <a
                 key={label}
                 href={`#${label.toLowerCase().replace(/\s+/g, "-")}`}
@@ -667,34 +669,170 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════
-          FINAL CTA BANNER
+          ABOUT ME
          ══════════════════════════════ */}
-      <section className="relative z-10 px-6 pb-28">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden p-px bg-gradient-to-br from-cyan-500/30 via-indigo-500/20 to-violet-500/30">
-            <div className="rounded-3xl bg-black px-10 py-14 text-center relative overflow-hidden">
-              {/* Inner glow */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
-              <p className="text-xs font-bold tracking-widest text-indigo-400 uppercase mb-4 font-mono relative">
-                Ready to try?
-              </p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-5 relative">
-                Your image → 3D model
-                <br />
-                <span className="text-shimmer">in under a minute</span>
-              </h2>
-              <p className="text-gray-400 mb-8 relative max-w-md mx-auto">
-                No setup required. The server is already running locally.
-                Open the app and drop your first image.
-              </p>
-              <Link
-                href="/dashboard"
-                className="group inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold text-base text-white bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-500 shadow-2xl shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300 hover:-translate-y-0.5 relative"
-              >
-                <MousePointer className="w-4 h-4" />
-                Open Workstation
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
+      <section
+        id="about"
+        ref={aboutSection.ref}
+        className="relative z-10 px-6 pb-28"
+      >
+        <div className="max-w-5xl mx-auto">
+          {/* Divider */}
+          <div className="border-t border-white/[0.05] mb-28" />
+
+          {/* Section label */}
+          <div className={`text-center mb-14 ${aboutSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
+            <p className="text-xs font-bold tracking-widest text-cyan-400 uppercase mb-3 font-mono">About the Creator</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+              Meet{" "}
+              <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
+                Tomi
+              </span>
+            </h2>
+          </div>
+
+          {/* Card */}
+          <div className={`relative rounded-3xl overflow-hidden p-px bg-gradient-to-br from-cyan-500/25 via-indigo-500/15 to-violet-500/25 ${aboutSection.inView ? "animate-fade-in-up delay-100" : "opacity-0"}`}>
+            <div className="rounded-3xl bg-gray-950/95 backdrop-blur-xl px-8 py-10 md:px-12 md:py-12 relative overflow-hidden">
+              {/* Background glow */}
+              <div className="absolute top-0 right-0 w-[500px] h-[300px] rounded-full bg-violet-500/5 blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-[400px] h-[250px] rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
+
+              <div className="relative flex flex-col md:flex-row gap-10 items-start">
+
+                {/* Left: Avatar + contact */}
+                <div className="flex flex-col items-center md:items-start gap-5 md:w-56 flex-shrink-0">
+                  {/* Avatar */}
+                  <div className="relative">
+                    <div className="w-36 h-36 rounded-2xl overflow-hidden ring-2 ring-white/10 shadow-2xl shadow-violet-500/20">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="https://creamypanda-coder.github.io/Porto/assets/cyberpunk_avatar.jpg"
+                        alt="Muhamad Tomi Tobuhita"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {/* Available badge */}
+                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold tracking-wide shadow-lg">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                      </span>
+                      Available for work
+                    </span>
+                  </div>
+
+                  {/* Name & title */}
+                  <div className="text-center md:text-left mt-3">
+                    <h3 className="text-lg font-extrabold text-white tracking-tight">Muhamad Tomi Tobuhita</h3>
+                    <p className="text-xs text-cyan-400 font-semibold mt-0.5">IT Engineer · Network Specialist · QA</p>
+                    <div className="flex items-center gap-1.5 mt-2 justify-center md:justify-start">
+                      <MapPin className="w-3 h-3 text-gray-500" />
+                      <span className="text-[11px] text-gray-500">Maluku Ambon, Indonesia</span>
+                    </div>
+                  </div>
+
+                  {/* Contact info */}
+                  <div className="flex flex-col gap-2 w-full">
+                    <a href="mailto:muhamadtomytobuhita@gmail.com" className="flex items-center gap-2 text-[11px] text-gray-400 hover:text-cyan-400 transition-colors group">
+                      <div className="w-6 h-6 rounded-lg bg-gray-800/60 flex items-center justify-center group-hover:bg-cyan-950/60 transition-colors">
+                        <Mail className="w-3 h-3" />
+                      </div>
+                      <span className="truncate">muhamadtomytobuhita@gmail.com</span>
+                    </a>
+                    <a href="https://wa.me/6282239638386" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-[11px] text-gray-400 hover:text-emerald-400 transition-colors group">
+                      <div className="w-6 h-6 rounded-lg bg-gray-800/60 flex items-center justify-center group-hover:bg-emerald-950/60 transition-colors">
+                        <Phone className="w-3 h-3" />
+                      </div>
+                      +62 822-3963-8386
+                    </a>
+                  </div>
+
+                  {/* Social links */}
+                  <div className="flex gap-2">
+                    {[
+                      { href: "https://github.com/Creamypanda-coder", icon: Code, color: "hover:text-white hover:bg-gray-700/60", label: "GitHub" },
+                      { href: "https://www.linkedin.com/in/muhamadtomitobuhita", icon: Link2, color: "hover:text-blue-400 hover:bg-blue-950/60", label: "LinkedIn" },
+                      { href: "https://instagram.com/kreamypanda", icon: Globe, color: "hover:text-pink-400 hover:bg-pink-950/60", label: "Instagram" },
+                      { href: "https://creamypanda-coder.github.io/Porto/", icon: ExternalLink, color: "hover:text-violet-400 hover:bg-violet-950/60", label: "Portfolio" },
+                    ].map(({ href, icon: Icon, color, label }, i) => (
+                      <a
+                        key={i}
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer"
+                        title={label}
+                        className={`w-9 h-9 rounded-xl bg-gray-800/50 border border-gray-700/40 flex items-center justify-center text-gray-500 transition-all duration-200 ${color}`}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right: Bio + Skills */}
+                <div className="flex-1 flex flex-col gap-7">
+                  {/* Bio */}
+                  <div>
+                    <p className="text-xs font-bold tracking-widest text-violet-400 uppercase mb-3 font-mono">About Me</p>
+                    <p className="text-gray-300 text-sm leading-relaxed mb-3">
+                      I am an IT Engineer, Network Specialist, and QA Services Professional with a deep passion for building reliable, secure, and high-performance IT infrastructure. Armed with experience in network management, system maintenance, troubleshooting, and quality assurance, I always strive to deliver efficient technology solutions that ensure stability, scalability, and operational excellence.
+                    </p>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      My primary focus lies in managing and optimizing IT infrastructure, network systems, and QA services to ensure secure, stable, and efficient operations — while also building modern web & mobile applications.
+                    </p>
+                  </div>
+
+                  {/* Skills grid */}
+                  <div>
+                    <p className="text-xs font-bold tracking-widest text-violet-400 uppercase mb-4 font-mono">Skills & Expertise</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {[
+                        { label: "Network Engineering", sub: "Routing, Switching & Protocols", color: "from-cyan-500 to-sky-500", bg: "bg-cyan-950/30" },
+                        { label: "Systems & Servers", sub: "Linux, Windows & VM Management", color: "from-indigo-500 to-violet-500", bg: "bg-indigo-950/30" },
+                        { label: "Quality Assurance", sub: "Manual, Automated & Stability Testing", color: "from-violet-500 to-fuchsia-500", bg: "bg-violet-950/30" },
+                        { label: "IT Security & Support", sub: "Firewalls, Diagnostics & Monitoring", color: "from-fuchsia-500 to-pink-500", bg: "bg-fuchsia-950/30" },
+                        { label: "Web Development", sub: "HTML5, CSS3, JavaScript & Frontend", color: "from-emerald-500 to-cyan-500", bg: "bg-emerald-950/30" },
+                        { label: "App Development", sub: "Android Mobile & Desktop Apps", color: "from-amber-500 to-orange-500", bg: "bg-amber-950/30" },
+                        { label: "UI/UX Design", sub: "Wireframing, Prototyping & Figma", color: "from-rose-500 to-pink-500", bg: "bg-rose-950/30" },
+                        { label: "3D Generation", sub: "AI Image-to-3D · TripoSR · GLB Export", color: "from-cyan-400 to-violet-500", bg: "bg-cyan-950/30" },
+                      ].map((skill, i) => (
+                        <div
+                          key={i}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-xl border border-white/[0.05] ${skill.bg} hover:border-white/10 hover:bg-white/[0.03] transition-all group cursor-default`}
+                        >
+                          <div className={`w-2 h-8 rounded-full bg-gradient-to-b ${skill.color} flex-shrink-0 group-hover:scale-110 transition-transform`} />
+                          <div>
+                            <p className="text-xs font-bold text-white">{skill.label}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{skill.sub}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Portfolio link */}
+                  <div className="flex items-center gap-3">
+                    <a
+                      href="https://creamypanda-coder.github.io/Porto/"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-500 shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/35 transition-all duration-300 hover:-translate-y-0.5"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      View Full Portfolio
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                    <Link
+                      href="/dashboard"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-gray-400 border border-gray-700 hover:border-gray-500 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      Try the App
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

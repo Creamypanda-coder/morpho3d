@@ -487,7 +487,7 @@ export async function POST(req: NextRequest) {
       const runLocalGPU = async () => {
         writeProgress("[Local GPU] Preparing local inputs...");
 
-        const { spawn } = require("child_process");
+        const { spawn } = require(/* turbopackIgnore: true */ "child_process");
 
         let localInputPath = "";
         let isTempInput = false;
@@ -509,7 +509,7 @@ export async function POST(req: NextRequest) {
         const localOutputPath = path.join(os.tmpdir(), `toms3d-output-${Date.now()}.glb`);
         const scriptPath = path.join(process.cwd(), "scripts", "local_generate.py");
 
-        const fsSync = require("fs");
+        const fsSync = require(/* turbopackIgnore: true */ "fs");
         let pythonCommand = "python";
         const possibleVenvPaths = [
           path.join(process.cwd(), "venv", "Scripts", "python.exe"),

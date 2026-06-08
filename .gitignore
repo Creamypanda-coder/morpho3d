@@ -34,6 +34,7 @@ Thumbs.db
 *.swo
 
 # Generated 3D models (user-generated, not tracked)
+generated/
 public/generated/*.glb
 public/generated/*.gltf
 public/generated/*.obj
@@ -59,3 +60,5 @@ env/
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel

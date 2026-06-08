@@ -8,7 +8,7 @@ import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import {
   Rotate3d, RefreshCw, Grid3X3, Eye, EyeOff,
-  Maximize2, Minimize2, Activity, AlertTriangle, Download
+  Maximize2, Minimize2, Activity, AlertTriangle
 } from "lucide-react";
 
 /* ─── Error Boundary ─── */
@@ -183,15 +183,7 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     }
   };
 
-  const handleDownloadGLB = () => {
-    if (!modelPath) return;
-    const a = document.createElement("a");
-    a.href = modelPath;
-    a.download = "model.glb";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+
 
   const bgClasses = {
     dark: "bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800 text-gray-100",
@@ -346,18 +338,7 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
           />
         </div>
 
-        {/* Divider */}
-        <div className="w-px h-5 bg-gray-700/60 mx-0.5" />
 
-        {/* Download GLB button */}
-        <button
-          onClick={handleDownloadGLB}
-          title="Download GLB"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold text-gray-300 hover:text-white hover:bg-gray-800/80 border border-transparent transition-all"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Download GLB
-        </button>
 
         <button onClick={handleToggleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           className="p-2.5 rounded-full text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 transition-all border border-transparent">

@@ -283,8 +283,8 @@ export default function Dashboard() {
         <section style={{ minHeight: 0, minWidth: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.75rem" }} className="custom-scrollbar pr-1">
           
           {/* Card 1: Upload & Preview */}
-          <div className="p-4 rounded-2xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
-            <div className="flex items-center justify-between mb-3">
+          <div className="p-3.5 rounded-xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
                 <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
                 1. Upload Source Image
@@ -303,7 +303,7 @@ export default function Dashboard() {
               onDragLeave={handleDrag}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[120px] ${
+              className={`border-2 border-dashed rounded-xl p-3 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[95px] ${
                 dragActive 
                   ? "border-cyan-500 bg-cyan-950/20 shadow-lg shadow-cyan-500/5" 
                   : "border-gray-800 hover:border-gray-700 bg-gray-950/40 hover:bg-gray-950/60"
@@ -323,12 +323,12 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-400">Uploading...</p>
                 </div>
               ) : imagePath ? (
-                <div className="relative w-full max-h-[120px] flex items-center justify-center overflow-hidden rounded-lg">
+                <div className="relative w-full max-h-[85px] flex items-center justify-center overflow-hidden rounded-lg">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imagePath}
                     alt="Preview"
-                    className="max-h-[110px] max-w-full object-contain rounded-lg shadow-md border border-gray-800"
+                    className="max-h-[75px] max-w-full object-contain rounded-lg shadow-md border border-gray-800"
                   />
                   <div className="absolute inset-0 bg-gray-950/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
                     <span className="text-[10px] bg-gray-900 border border-gray-800 px-3 py-1 rounded-lg text-gray-300 font-semibold">
@@ -337,9 +337,9 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <div className="p-2.5 rounded-lg bg-gray-900 border border-gray-800 text-gray-400">
-                    <Upload className="w-4 h-4" />
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-400">
+                    <Upload className="w-3.5 h-3.5" />
                   </div>
                   <p className="text-xs text-gray-300 font-medium">
                     Drop image here or <span className="text-cyan-400">browse</span>
@@ -351,8 +351,8 @@ export default function Dashboard() {
           </div>
 
           {/* Card 2: AI Image Analysis */}
-          <div className="p-4 rounded-2xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
-            <div className="flex items-center justify-between mb-3">
+          <div className="p-3.5 rounded-xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                 2. AI Vision Analysis
@@ -365,12 +365,12 @@ export default function Dashboard() {
             </div>
 
             {!imagePath ? (
-              <div className="p-3 rounded-xl border border-gray-900 bg-gray-950/40 text-center py-6 text-xs text-gray-500 flex items-center justify-center gap-2">
+              <div className="p-3 rounded-xl border border-gray-900 bg-gray-950/40 text-center py-4 text-xs text-gray-500 flex items-center justify-center gap-2">
                 <Clock className="w-3.5 h-3.5" />
                 Upload an image to begin analysis
               </div>
             ) : analyzeMutation.isPending ? (
-              <div className="p-3 rounded-xl border border-indigo-900/30 bg-indigo-950/10 text-center py-5 text-xs text-indigo-400 flex flex-col items-center gap-2">
+              <div className="p-3 rounded-xl border border-indigo-900/30 bg-indigo-950/10 text-center py-4 text-xs text-indigo-400 flex flex-col items-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span>AI Vision analyzing your image...</span>
                 <span className="text-[10px] text-gray-500">Reading shape, materials & geometry...</span>
@@ -378,14 +378,14 @@ export default function Dashboard() {
             ) : !analysis ? (
               <button
                 onClick={() => analyzeMutation.mutate(imagePath)}
-                className="w-full py-2.5 px-4 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all"
+                className="w-full py-2 px-3 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 Analyze Image with AI Vision
               </button>
             ) : (
-              <div className="flex flex-col gap-2">
-                <div className="bg-gray-950/80 border border-gray-800/50 p-3 rounded-xl max-h-[130px] overflow-y-auto font-mono text-[10px] leading-relaxed text-gray-300 custom-scrollbar select-text whitespace-pre-wrap">
+              <div className="flex flex-col gap-1.5">
+                <div className="bg-gray-950/80 border border-gray-800/50 p-2.5 rounded-xl max-h-[75px] overflow-y-auto font-mono text-[10px] leading-relaxed text-gray-300 custom-scrollbar select-text whitespace-pre-wrap">
                   {analysis}
                 </div>
                 <button
@@ -400,36 +400,36 @@ export default function Dashboard() {
           </div>
 
           {/* Card 3: 3D Generation */}
-          <div className="p-4 rounded-2xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2 mb-3">
+          <div className="p-3.5 rounded-xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2 mb-2">
               <Box className="w-3.5 h-3.5 text-violet-400" />
               3. Generate 3D Model
             </h2>
 
             {!imagePath ? (
-              <div className="p-3 rounded-xl border border-gray-900 bg-gray-950/40 text-center py-6 text-xs text-gray-500 flex items-center justify-center gap-2">
+              <div className="p-3 rounded-xl border border-gray-900 bg-gray-950/40 text-center py-4 text-xs text-gray-500 flex items-center justify-center gap-2">
                 <Clock className="w-3.5 h-3.5" />
                 Upload an image to enable generation
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 {/* Analysis connected indicator */}
                 {analysis && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-950/20 border border-emerald-800/30">
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-950/20 border border-emerald-800/30">
                     <Zap className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                    <span className="text-[10px] text-emerald-300">
+                    <span className="text-[10px] text-emerald-300 leading-tight">
                       AI analysis connected — reconstruction guided by image content
                     </span>
                   </div>
                 )}
 
                 {/* Model Selector */}
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-0.5">
                   <span className="text-[10px] text-gray-500 font-mono">Reconstruction Model:</span>
                   <select
                     value={modelType}
                     onChange={(e) => setModelType(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-xs font-mono text-cyan-400 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs font-mono text-cyan-400 focus:outline-none focus:border-cyan-500 transition-colors"
                   >
                     <option value="stable-fast-3d">⚡ High-Fidelity — Stable Fast 3D</option>
                     <option value="triposr">🔷 Standard — TripoSR</option>
@@ -439,7 +439,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => generateMutation.mutate(imagePath)}
                   disabled={generateMutation.isPending || !imagePath}
-                  className="w-full py-3 px-4 rounded-xl font-bold bg-gradient-to-r from-cyan-500 to-indigo-500 text-white hover:from-cyan-400 hover:to-indigo-400 disabled:from-gray-800 disabled:to-gray-800 disabled:text-gray-500 transition-all text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/10"
+                  className="w-full py-2.5 px-4 rounded-xl font-bold bg-gradient-to-r from-cyan-500 to-indigo-500 text-white hover:from-cyan-400 hover:to-indigo-400 disabled:from-gray-800 disabled:to-gray-800 disabled:text-gray-500 transition-all text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/10"
                 >
                   {generateMutation.isPending ? (
                     <>
@@ -461,7 +461,7 @@ export default function Dashboard() {
                       <Terminal className="w-3 h-3 text-cyan-500" />
                       Pipeline Logs:
                     </span>
-                    <div className="bg-gray-950 border border-gray-900 p-2.5 rounded-lg font-mono text-[10px] text-cyan-500/90 max-h-[100px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
+                    <div className="bg-gray-950 border border-gray-900 p-2.5 rounded-lg font-mono text-[10px] text-cyan-500/90 max-h-[70px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
                       {consoleLogs.map((log, index) => (
                         <div key={index} className="leading-normal break-all">{log}</div>
                       ))}

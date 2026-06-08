@@ -609,20 +609,6 @@ export default function LandingPage() {
               </a>
             </div>
 
-            {/* Hero stats */}
-            <div className={`grid grid-cols-2 gap-x-8 gap-y-4 border-t border-white/[0.05] pt-8 w-full ${heroSection.inView ? "animate-fade-in-up delay-400" : "opacity-0"}`}>
-              {[
-                { val: "< 30s", label: "Reconstruction time" },
-                { val: "GLB",   label: "Standard 3D format" },
-                { val: "Free",  label: "Unlimited local use" },
-                { val: "Private", label: "Processing stays local" },
-              ].map((s) => (
-                <div key={s.label} className="flex flex-col">
-                  <span className="text-xl font-extrabold text-white">{s.val}</span>
-                  <span className="text-[10px] text-gray-500 font-mono tracking-wide uppercase mt-0.5">{s.label}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Right Column: Motion Design Demo */}

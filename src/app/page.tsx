@@ -593,10 +593,28 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
           {/* Left Column: Title & Info */}
           <div className="lg:col-span-5 flex flex-col items-start text-left">
-            {/* Badge */}
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-950/30 text-cyan-300 text-xs font-semibold mb-4 ${heroSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
-              <Sparkles className="w-3.5 h-3.5" />
-              AI-Powered · Image to 3D · Free & Local (Beta Version)
+            {/* Live status + colorful indicator pills */}
+            <div className={`flex flex-wrap items-center gap-2 mb-5 ${heroSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
+              {/* Live pulse indicator */}
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/50 border border-emerald-500/25 text-emerald-400 text-[10px] font-bold tracking-wide">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                </span>
+                LIVE
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/20 text-cyan-300 text-[10px] font-semibold">
+                <Sparkles className="w-2.5 h-2.5" />
+                AI-Powered
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-950/40 border border-violet-500/20 text-violet-300 text-[10px] font-semibold">
+                <Cpu className="w-2.5 h-2.5" />
+                Local GPU
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-950/40 border border-indigo-500/20 text-indigo-300 text-[10px] font-semibold">
+                <Box className="w-2.5 h-2.5" />
+                GLB · GLTF
+              </span>
             </div>
 
             {/* Headline */}
@@ -605,17 +623,9 @@ export default function LandingPage() {
             </h1>
 
             {/* Sub */}
-            <p className={`text-gray-400 text-sm leading-relaxed mb-5 max-w-lg ${heroSection.inView ? "animate-fade-in-up delay-200" : "opacity-0"}`}>
+            <p className={`text-gray-400 text-sm leading-relaxed mb-6 max-w-lg ${heroSection.inView ? "animate-fade-in-up delay-200" : "opacity-0"}`}>
               Upload an image. AI reads shape and depth cues. Stable Fast 3D reconstructs a full GLB — ready to rotate, inspect, and download.
             </p>
-
-            {/* Beta Alert Banner */}
-            <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl bg-amber-500/5 border border-amber-500/15 text-amber-400/90 text-xs max-w-lg mb-6 leading-relaxed ${heroSection.inView ? "animate-fade-in-up delay-250" : "opacity-0"}`}>
-              <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/25 flex-shrink-0">
-                BETA NOTICE
-              </span>
-              <span>This application is currently in open Beta. Feature scaling and model inference speeds are under active development.</span>
-            </div>
 
             {/* CTA buttons */}
             <div className={`flex flex-row items-center gap-3 w-full mb-6 ${heroSection.inView ? "animate-fade-in-up delay-300" : "opacity-0"}`}>

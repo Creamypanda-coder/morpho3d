@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
           absoluteImagePath = path.join(os.tmpdir(), "toms3d-uploads", fname);
         } else {
           const relativeImagePath = imagePath.replace(/^\//, "");
-          absoluteImagePath = path.join(process.cwd(), "public", relativeImagePath);
+          absoluteImagePath = path.join(process.cwd(/*turbopackIgnore: true*/), "public", relativeImagePath);
         }
 
         try {
@@ -502,18 +502,18 @@ export async function POST(req: NextRequest) {
             localInputPath = path.join(os.tmpdir(), "toms3d-uploads", fname);
           } else {
             const relativeImagePath = imagePath.replace(/^\//, "");
-            localInputPath = path.join(process.cwd(), "public", relativeImagePath);
+            localInputPath = path.join(process.cwd(/*turbopackIgnore: true*/), "public", relativeImagePath);
           }
         }
 
         const localOutputPath = path.join(os.tmpdir(), `toms3d-output-${Date.now()}.glb`);
-        const scriptPath = path.join(process.cwd(), "scripts", "local_generate.py");
+        const scriptPath = path.join(process.cwd(/*turbopackIgnore: true*/), "scripts", "local_generate.py");
 
         const fsSync = require(/* turbopackIgnore: true */ "fs");
         let pythonCommand = "python";
         const possibleVenvPaths = [
-          path.join(process.cwd(), "venv", "Scripts", "python.exe"),
-          path.join(process.cwd(), ".venv", "Scripts", "python.exe"),
+          path.join(process.cwd(/*turbopackIgnore: true*/), "venv", "Scripts", "python.exe"),
+          path.join(process.cwd(/*turbopackIgnore: true*/), ".venv", "Scripts", "python.exe"),
           "C:\\Users\\untou\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe",
         ];
         for (const p of possibleVenvPaths) {

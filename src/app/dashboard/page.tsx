@@ -234,9 +234,9 @@ export default function Dashboard() {
   const isWorking = uploadMutation.isPending || analyzeMutation.isPending || generateMutation.isPending;
 
   return (
-    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", background: "#030712", overflow: "hidden" }}>
+    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", background: "#000000", overflow: "hidden" }}>
       {/* Top Navbar */}
-      <header className="border-b border-gray-900 bg-gray-950/70 backdrop-blur-md z-40 px-4 py-3 flex items-center justify-between flex-shrink-0">
+      <header className="border-b border-gray-900 bg-black/70 backdrop-blur-md z-40 px-4 py-3 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <Link 
             href="/" 
@@ -250,6 +250,9 @@ export default function Dashboard() {
             </span>
             <span className="text-xs bg-gray-900 border border-gray-800 px-2 py-0.5 rounded text-cyan-400 font-mono">
               WORKSTATION
+            </span>
+            <span className="text-[9px] font-bold bg-amber-500/10 border border-amber-500/25 px-1.5 py-0.5 rounded text-amber-400 font-mono">
+              BETA
             </span>
           </div>
         </div>

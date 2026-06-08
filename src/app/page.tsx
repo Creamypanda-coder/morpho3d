@@ -438,7 +438,7 @@ export default function LandingPage() {
   const featSection  = useInView(0.1);
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-[#020817] overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col bg-black overflow-x-hidden">
 
       {/* ── Ambient background glows ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -453,20 +453,39 @@ export default function LandingPage() {
             backgroundSize: "64px 64px",
           }}
         />
+
+        {/* Floating 3D Background Assets with low opacity */}
+        <div className="absolute top-[12%] left-[3%] w-[320px] h-[320px] opacity-[0.05] blur-[1px] animate-float">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/wireframe_mesh_3d.png" alt="3D Mesh Background 1" className="w-full h-full object-contain" />
+        </div>
+        <div className="absolute top-[52%] right-[5%] w-[380px] h-[380px] opacity-[0.06] blur-[0.5px] animate-spin-slow">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/torus_knot_3d.png" alt="3D Torus Background" className="w-full h-full object-contain" />
+        </div>
+        <div className="absolute bottom-[8%] left-[6%] w-[360px] h-[360px] opacity-[0.04] blur-[2px] animate-float-slow">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/wireframe_mesh_3d.png" alt="3D Mesh Background 2" className="w-full h-full object-contain transform rotate-45" />
+        </div>
       </div>
 
       {/* ══════════════════════════════
           NAV
          ══════════════════════════════ */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.05] bg-[#020817]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-white/[0.05] bg-black/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
               <Box className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} />
             </div>
-            <span className="font-bold text-[17px] tracking-tight">
-              <span className="text-shimmer">Toms 3D Generator</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[17px] tracking-tight">
+                <span className="text-shimmer">Toms 3D Generator</span>
+              </span>
+              <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/25">
+                BETA
+              </span>
+            </div>
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -514,7 +533,7 @@ export default function LandingPage() {
             {/* Badge */}
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-950/30 text-cyan-300 text-xs font-semibold mb-4 ${heroSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
               <Sparkles className="w-3.5 h-3.5" />
-              AI-Powered · Image to 3D · Free & Local
+              AI-Powered · Image to 3D · Free & Local (Beta Version)
             </div>
 
             {/* Headline */}
@@ -526,6 +545,14 @@ export default function LandingPage() {
             <p className={`text-gray-400 text-sm leading-relaxed mb-5 max-w-lg ${heroSection.inView ? "animate-fade-in-up delay-200" : "opacity-0"}`}>
               Upload an image. AI reads shape and depth cues. Stable Fast 3D reconstructs a full GLB — ready to rotate, inspect, and download.
             </p>
+
+            {/* Beta Alert Banner */}
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl bg-amber-500/5 border border-amber-500/15 text-amber-400/90 text-xs max-w-lg mb-6 leading-relaxed ${heroSection.inView ? "animate-fade-in-up delay-250" : "opacity-0"}`}>
+              <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/25 flex-shrink-0">
+                BETA NOTICE
+              </span>
+              <span>This application is currently in open Beta. Feature scaling and model inference speeds are under active development.</span>
+            </div>
 
             {/* CTA buttons */}
             <div className={`flex flex-row items-center gap-3 w-full mb-6 ${heroSection.inView ? "animate-fade-in-up delay-300" : "opacity-0"}`}>
@@ -622,7 +649,7 @@ export default function LandingPage() {
       <section className="relative z-10 px-6 pb-28">
         <div className="max-w-4xl mx-auto">
           <div className="relative rounded-3xl overflow-hidden p-px bg-gradient-to-br from-cyan-500/30 via-indigo-500/20 to-violet-500/30">
-            <div className="rounded-3xl bg-[#020817] px-10 py-14 text-center relative overflow-hidden">
+            <div className="rounded-3xl bg-black px-10 py-14 text-center relative overflow-hidden">
               {/* Inner glow */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
               <p className="text-xs font-bold tracking-widest text-indigo-400 uppercase mb-4 font-mono relative">

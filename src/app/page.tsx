@@ -668,12 +668,14 @@ export default function LandingPage() {
       <section
         id="features"
         ref={featSection.ref}
-        className="relative z-10 px-6 py-28"
+        className="relative z-10 py-28 w-full"
       >
         {/* Divider line */}
-        <div className="max-w-6xl mx-auto border-t border-white/[0.05] mb-28" />
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="border-t border-white/[0.05] mb-28" />
+        </div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto px-6">
           <div className={`text-center mb-16 ${featSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
             <p className="text-xs font-bold tracking-widest text-violet-400 uppercase mb-3 font-mono">Features</p>
             <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
@@ -743,8 +745,8 @@ export default function LandingPage() {
       {/* ══════════════════════════════
           FOOTER
          ══════════════════════════════ */}
-      <footer className="border-t border-white/[0.05] py-8 px-6 z-10 relative">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="border-t border-white/[0.05] py-8 z-10 relative">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center">
               <Box className="w-3.5 h-3.5 text-white" />

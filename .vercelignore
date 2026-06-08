@@ -1,0 +1,12 @@
+# Local junctions/symlinks that cause Windows-absolute path errors on Linux builders
+generated
+uploads
+
+# Python virtual environments
+venv
+.venv
+TripoSR
+
+# Scratch and test files
+scratch
+test_output.glb

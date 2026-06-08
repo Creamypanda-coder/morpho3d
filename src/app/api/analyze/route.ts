@@ -60,55 +60,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ==========================================
-    // Strategy 1: Try Google Gemini Vision (AI Studio)
-    // ==========================================
-    if (process.env.GEMINI_API_KEY) {
-      console.log("[Analyze] Using Google Gemini Vision...");
-      try {
-        const geminiResponse = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [
-                    {
-                      text: "Analyze this image and provide a highly detailed 3D modeling description. Focus on:\n1. Shape & Overall Structure (3D form, silhouette, primary geometry type)\n2. Estimated Dimensions & Scale (relative width/height/depth proportions)\n3. Geometry Details (faces, edges, subdivisions, hard/soft edges)\n4. Material & Surface Properties (roughness, metalness, transparency, emissive)\n5. Texture & Color Details (patterns, gradients, UV layout hints)\n6. Object Components (any sub-parts, attachments, details)\n7. Recommended 3D Generation Settings (complexity, poly count, texture resolution)\n\nBe precise and technical. This description will directly guide AI 3D reconstruction."
-                    },
-                    {
-                      inlineData: {
-                        mimeType: mimeType,
-                        data: base64Image
-                      }
-                    }
-                  ]
-                }
-              ]
-            }),
-            signal: AbortSignal.timeout(30000)
-          }
-        );
-
-        if (geminiResponse.ok) {
-          const geminiData = await geminiResponse.json();
-          const prompt = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          if (prompt && prompt.length > 50) {
-            return NextResponse.json({ prompt, source: "gemini" });
-          }
-        } else {
-          const errorText = await geminiResponse.text();
-          console.warn("[Analyze] Gemini response error:", errorText);
-        }
-      } catch (err: any) {
-        console.warn("[Analyze] Gemini failed, trying next source:", err.message);
-      }
-    }
-
-    // ==========================================
     // Strategy 2: Try OpenAI GPT-4o-mini Vision
     // ==========================================
     if (process.env.OPENAI_API_KEY) {

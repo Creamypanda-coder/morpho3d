@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useMutation } from "@tanstack/react-query";
@@ -35,7 +35,6 @@ const ModelViewer = dynamic(() => import("@/components/ModelViewer"), {
 });
 
 const SOURCE_BADGES: Record<string, { label: string; color: string }> = {
-  gemini: { label: "Google Gemini Vision", color: "text-sky-400 bg-sky-950/40 border-sky-500/20" },
   openai: { label: "OpenAI GPT-4o Vision", color: "text-emerald-400 bg-emerald-950/40 border-emerald-500/20" },
   llava: { label: "LLaVA-1.5 Vision", color: "text-indigo-400 bg-indigo-950/40 border-indigo-500/20" },
   blip2: { label: "BLIP-2 Vision", color: "text-violet-400 bg-violet-950/40 border-violet-500/20" },
@@ -46,7 +45,8 @@ export default function Dashboard() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const glbInputRef = useRef<HTMLInputElement>(null);
-  
+  const logContainerRef = useRef<HTMLDivElement>(null);
+
   // App States
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string | null>(null);
@@ -55,6 +55,12 @@ export default function Dashboard() {
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [modelType, setModelType] = useState<string>("local-gpu");
+
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [consoleLogs]);
 
   const addLog = useCallback((msg: string) => {
     setConsoleLogs((prev) => [...prev, msg]);
@@ -173,20 +179,8 @@ export default function Dashboard() {
         analysis
           ? `[INFO] AI Analysis context loaded (${SOURCE_BADGES[analysisSource]?.label || "AI Vision"}) — guiding reconstruction.`
           : "[INFO] No analysis context. Upload and analyze image first for best results.",
-        "[INFO] Connecting to Hugging Face inference pipeline...",
+        "[INFO] Initiating server-side generation stream...",
       ]);
-
-      const logSteps = [
-        { msg: "[PIPELINE] Queue joined. Uploading to GPU worker...", delay: 800 },
-        { msg: "[PIPELINE] Background removal & foreground extraction...", delay: 2500 },
-        { msg: "[PIPELINE] Running feed-forward 3D reconstruction on GPU...", delay: 5000 },
-        { msg: "[PIPELINE] Generating PBR textures & UV coordinates...", delay: 9000 },
-        { msg: "[PIPELINE] Compiling 3D mesh to binary GLB format...", delay: 12500 },
-      ];
-
-      logSteps.forEach(({ msg, delay }) => {
-        setTimeout(() => addLog(msg), delay);
-      });
 
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -194,23 +188,73 @@ export default function Dashboard() {
         body: JSON.stringify({
           imagePath: path,
           modelType,
-          analysisPrompt: analysis || null, // ← pass AI analysis to backend
+          analysisPrompt: analysis || null,
         }),
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: "3D generation failed" }));
-        throw new Error(errorData.error || "3D generation failed");
+        throw new Error("Failed to start generation stream");
       }
 
-      const blob = await res.blob();
-      const localModelUrl = URL.createObjectURL(blob);
-      const modelUsed = res.headers.get("x-model-used") || "stable-fast-3d";
-      const fallbackTriggered = res.headers.get("x-fallback-triggered") === "true";
+      if (!res.body) {
+        throw new Error("Response body is not readable");
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      let localModelPath = "";
+      let modelUsed = "local-gpu";
+      let fallbackTriggered = false;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data:")) {
+            const rawData = line.substring(5).trim();
+            if (!rawData) continue;
+            
+            try {
+              const event = JSON.parse(rawData);
+              if (event.status === "progress") {
+                addLog(event.message);
+              } else if (event.status === "success") {
+                // Convert base64 GLB to Blob URL
+                const base64Data = event.result;
+                const binaryString = window.atob(base64Data);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                  bytes[i] = binaryString.charCodeAt(i);
+                }
+                const blob = new Blob([bytes], { type: "model/gltf-binary" });
+                localModelPath = URL.createObjectURL(blob);
+                modelUsed = event.modelUsed;
+                fallbackTriggered = event.fallbackTriggered;
+              } else if (event.status === "error") {
+                throw new Error(event.message || "Generation failed");
+              }
+            } catch (err: any) {
+              if (err.message) throw err;
+            }
+          }
+        }
+      }
+
+      if (!localModelPath) {
+        throw new Error("Server closed the connection before generating the model");
+      }
 
       return { 
         success: true, 
-        modelPath: localModelUrl, 
+        modelPath: localModelPath, 
         modelUsed, 
         fallbackTriggered 
       };
@@ -537,13 +581,16 @@ export default function Dashboard() {
                       <Terminal className="w-3 h-3 text-cyan-500" />
                       Pipeline Logs:
                     </span>
-                    <div className="bg-gray-950 border border-gray-900 p-2.5 rounded-lg font-mono text-[10px] text-cyan-500/90 max-h-[70px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
+                    <div 
+                      ref={logContainerRef}
+                      className="bg-gray-950 border border-gray-900 p-2.5 rounded-lg font-mono text-[10px] text-cyan-500/90 h-[140px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar scroll-smooth"
+                    >
                       {consoleLogs.map((log, index) => (
                         <div key={index} className="leading-normal break-all">{log}</div>
                       ))}
                       {generateMutation.isPending && (
-                        <div className="text-gray-500 animate-pulse flex items-center gap-1">
-                          <span>█</span><span>Reconstructing...</span>
+                        <div className="text-cyan-500/60 animate-pulse flex items-center gap-1">
+                          <span>█</span><span>Processing pipeline...</span>
                         </div>
                       )}
                     </div>

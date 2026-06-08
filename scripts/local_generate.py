@@ -2,17 +2,25 @@ import os
 import sys
 import json
 
+# Add TripoSR repository to Python path
+triposr_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "TripoSR")
+if triposr_path not in sys.path:
+    sys.path.append(triposr_path)
+
 def report_status(status, message, details=None):
     print(json.dumps({
         "status": status,
         "message": message,
         "details": details
     }))
-    sys.exit(0)
+    if status in ("success", "error"):
+        sys.exit(0 if status == "success" else 1)
 
 # Check dependencies
 try:
     import torch
+    if not hasattr(torch, "float8_e8m0fnu"):
+        setattr(torch, "float8_e8m0fnu", torch.float32)
 except ImportError:
     report_status("error", "PyTorch is not installed.", "Please install PyTorch with CUDA support: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121")
 
@@ -57,19 +65,24 @@ def main():
         report_status("progress", "Preprocessing image (background removal)...", "")
         image = Image.open(input_path)
         
-        # Remove background using standard TripoSR utility
-        processed_image = remove_background(image)
+        import rembg
+        import numpy as np
+        rembg_session = rembg.new_session()
+        processed_image = remove_background(image, rembg_session)
         processed_image = resize_foreground(processed_image, 0.85)
+
+        # Blend transparent background to grey (0.5) and convert to RGB (3 channels)
+        img_np = np.array(processed_image).astype(np.float32) / 255.0
+        img_np = img_np[:, :, :3] * img_np[:, :, 3:4] + (1 - img_np[:, :, 3:4]) * 0.5
+        processed_image = Image.fromarray((img_np * 255.0).astype(np.uint8))
 
         report_status("progress", "Running feed-forward 3D reconstruction on NVIDIA GPU...", "")
         with torch.no_grad():
-            scene = model(processed_image, device=device)
+            scene_codes = model([processed_image], device=device)
 
         report_status("progress", "Extracting mesh and compiling GLB file...", "")
-        # Export GLB
-        # tsr uses trimesh to export, let's call the built-in save_glb utility
-        from tsr.utils import save_glb
-        save_glb(scene, output_path)
+        meshes = model.extract_mesh(scene_codes, True, resolution=256)
+        meshes[0].export(output_path)
 
         report_status("success", "3D model generated locally using NVIDIA GPU successfully!", {
             "output_path": output_path

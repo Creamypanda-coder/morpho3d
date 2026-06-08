@@ -682,11 +682,10 @@ export default function LandingPage() {
 
           {/* Section label */}
           <div className={`text-center mb-14 ${aboutSection.inView ? "animate-fade-in-up" : "opacity-0"}`}>
-            <p className="text-xs font-bold tracking-widest text-cyan-400 uppercase mb-3 font-mono">About the Creator</p>
             <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-              Meet{" "}
+              About the{" "}
               <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
-                Tomi
+                Creator
               </span>
             </h2>
           </div>

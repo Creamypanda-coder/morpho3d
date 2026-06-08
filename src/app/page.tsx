@@ -87,44 +87,6 @@ function MotionDemo() {
 
   return (
     <div className="w-full max-w-5xl mx-auto">
-      {/* Step selectors */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
-        {steps.map((s, i) => {
-          const Icon = s.icon;
-          const isActive = active === i;
-          return (
-            <button
-              key={i}
-              onClick={() => { setActive(i); setProgress(0); }}
-              className={`flex-1 flex items-center gap-2.5 px-4 py-3 rounded-xl border text-left transition-all duration-500 ${
-                isActive
-                  ? "border-indigo-500/45 bg-indigo-950/40 shadow-md shadow-indigo-500/10"
-                  : "border-gray-800/60 bg-gray-900/20 hover:border-gray-700 hover:bg-gray-900/40"
-              }`}
-            >
-              <div className={`w-8.5 h-8.5 rounded-lg flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${s.color} ${isActive ? "shadow-md" : "opacity-40"} transition-all duration-500`}>
-                <Icon className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-[9px] font-bold font-mono tracking-wider ${isActive ? "text-indigo-400" : "text-gray-600"}`}>
-                    {s.num}
-                  </span>
-                  {isActive && (
-                    <span className="text-[8px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-1 py-0.2 rounded-full">
-                      LIVE
-                    </span>
-                  )}
-                </div>
-                <p className={`text-[12px] font-semibold mt-0.5 ${isActive ? "text-white" : "text-gray-500"}`}>
-                  {s.label}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
       {/* Demo screen */}
       <div className="demo-screen w-full relative" style={{ minHeight: 400 }}>
         {/* Top browser bar */}

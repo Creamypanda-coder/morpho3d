@@ -94,9 +94,13 @@ body {
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* =====================
-   Utility animation classes
-   ===================== */
+/* Scan line laser transition */
+@keyframes scanLineAnim {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(180px); }
+}
+
+/* utility classes */
 .animate-fade-in-up   { animation: fadeInUp 0.7s cubic-bezier(0.22,1,0.36,1) both; }
 .animate-fade-in      { animation: fadeIn  0.6s ease both; }
 .animate-scale-in     { animation: scaleIn 0.6s cubic-bezier(0.22,1,0.36,1) both; }
@@ -106,6 +110,7 @@ body {
 .animate-spin-slow    { animation: spinSlow 20s linear infinite; }
 .animate-blink-cursor { animation: blinkCursor 1s step-end infinite; }
 .animate-slide-left   { animation: slideInLeft 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.animate-scan-line    { animation: scanLineAnim 3s ease-in-out infinite; }
 
 /* Delay helpers */
 .delay-100  { animation-delay: 0.1s; }

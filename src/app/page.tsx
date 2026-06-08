@@ -126,7 +126,7 @@ function MotionDemo() {
       </div>
 
       {/* Demo screen */}
-      <div className="demo-screen w-full relative" style={{ minHeight: 330 }}>
+      <div className="demo-screen w-full relative" style={{ minHeight: 400 }}>
         {/* Top browser bar */}
         <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
           <div className="flex gap-1.5">
@@ -144,7 +144,7 @@ function MotionDemo() {
         </div>
 
         {/* Step-specific content */}
-        <div className="relative overflow-hidden" style={{ minHeight: 270 }}>
+        <div className="relative overflow-hidden" style={{ minHeight: 340 }}>
           {steps.map((s, i) => (
             <div
               key={i}
@@ -161,11 +161,19 @@ function MotionDemo() {
         </div>
 
         {/* Progress bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-800/60">
+        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gray-950/80 overflow-hidden">
           <div
-            className={`h-full bg-gradient-to-r ${steps[active].color} transition-none`}
+            className={`h-full bg-gradient-to-r ${steps[active].color} rounded-r-full transition-all duration-100 relative`}
             style={{ width: `${progress}%` }}
-          />
+          >
+            {/* Glowing tip */}
+            {progress > 0 && progress < 100 && (
+              <>
+                <span className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white/40 blur-xs animate-ping" />
+                <span className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#fff]" />
+              </>
+            )}
+          </div>
         </div>
 
         {/* Ambient glow behind screen */}
@@ -197,13 +205,13 @@ function UploadScreen() {
   }, []);
 
   return (
-    <div className="flex items-center justify-center p-8 h-full min-h-[320px]">
-      <div className="w-full max-w-md flex flex-col gap-5">
+    <div className="flex items-center justify-center p-6 h-full min-h-[340px]">
+      <div className="w-full max-w-md flex flex-col gap-4">
         {/* Drop zone */}
-        <div className="border border-dashed border-cyan-500/40 rounded-2xl p-6 flex flex-col items-center gap-2 bg-cyan-950/10 relative overflow-hidden">
+        <div className="border border-dashed border-cyan-500/40 rounded-2xl p-5 flex flex-col items-center gap-2 bg-cyan-950/10 relative overflow-hidden transition-colors duration-500 hover:border-cyan-400">
           <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none" />
-          <div className="w-12 h-12 rounded-xl bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/10">
-            <Upload className="w-5 h-5 text-cyan-400" />
+          <div className="w-11 h-11 rounded-xl bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/10">
+            <Upload className="w-4.5 h-4.5 text-cyan-400" />
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-200 text-center">Drop your image here</p>
@@ -232,9 +240,9 @@ function UploadScreen() {
           )}
         </div>
         {/* Mini preview */}
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-900/60 border border-gray-800/60">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-900/60 to-sky-900/60 border border-cyan-800/30 flex items-center justify-center flex-shrink-0">
-            <Box className="w-4 h-4 text-cyan-400 opacity-60" />
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-900/60 border border-gray-800/60 animate-float">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-900/60 to-sky-900/60 border border-cyan-800/30 flex items-center justify-center flex-shrink-0">
+            <Box className="w-3.5 h-3.5 text-cyan-400 opacity-60" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-semibold text-gray-300 truncate">photo_product.png</p>
@@ -269,34 +277,66 @@ function AnalyzeScreen() {
   }, []);
 
   return (
-    <div className="flex items-center justify-center p-8 h-full min-h-[320px]">
-      <div className="w-full max-w-md">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-7 h-7 rounded-lg bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-indigo-400" />
+    <div className="flex items-center justify-center p-6 h-full min-h-[340px]">
+      <div className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-indigo-400" />
+            </div>
+            <span className="text-xs font-semibold text-gray-300">AI Vision Analysis</span>
+            <span className="ml-auto text-[10px] text-indigo-400 font-mono animate-pulse">● Analyzing</span>
           </div>
-          <span className="text-xs font-semibold text-gray-300">AI Vision Analysis</span>
-          <span className="ml-auto text-[10px] text-indigo-400 font-mono animate-pulse">● Analyzing</span>
+          <div className="rounded-xl bg-gray-950/80 border border-gray-800/60 p-4 font-mono text-[11px] leading-relaxed min-h-[200px]">
+            {lines.slice(0, step).map((line, i) => (
+              <div
+                key={i}
+                className="text-cyan-400/90 leading-6 animate-slide-left"
+                style={{ animation: `slideInLeft 0.3s ease both` }}
+              >
+                {line}
+              </div>
+            ))}
+            {step < lines.length && (
+              <span className="text-gray-600 animate-blink-cursor">█</span>
+            )}
+            {step >= lines.length && (
+              <div className="mt-3 flex items-center gap-2 text-emerald-400 text-[11px]">
+                <span className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[9px]">✓</span>
+                Ready for 3D reconstruction
+              </div>
+            )}
+          </div>
         </div>
-        <div className="rounded-xl bg-gray-950/80 border border-gray-800/60 p-4 font-mono text-[11px] leading-relaxed min-h-[200px]">
-          {lines.slice(0, step).map((line, i) => (
-            <div
-              key={i}
-              className="text-cyan-400/90 leading-6"
-              style={{ animation: `slideInLeft 0.3s ease both` }}
-            >
-              {line}
-            </div>
-          ))}
-          {step < lines.length && (
-            <span className="text-gray-600 animate-blink-cursor">█</span>
-          )}
-          {step >= lines.length && (
-            <div className="mt-3 flex items-center gap-2 text-emerald-400 text-[11px]">
-              <span className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[9px]">✓</span>
-              Ready for 3D reconstruction
-            </div>
-          )}
+
+        {/* Graphical Scanning Preview Visual */}
+        <div className="hidden md:flex flex-col items-center justify-center p-4 rounded-xl border border-gray-800/60 bg-gray-950/40 relative overflow-hidden min-h-[240px]">
+          {/* Grid backdrop */}
+          <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+          
+          {/* 3D wireframe mesh SVG */}
+          <svg width="110" height="110" viewBox="0 0 100 100" className="text-cyan-400/35 animate-pulse duration-1000">
+            <polygon points="20,30 50,15 80,30 80,70 50,85 20,70" fill="none" stroke="currentColor" strokeWidth="1.2" />
+            <line x1="20" y1="30" x2="50" y2="50" stroke="currentColor" strokeWidth="0.8" />
+            <line x1="80" y1="30" x2="50" y2="50" stroke="currentColor" strokeWidth="0.8" />
+            <line x1="50" y1="85" x2="50" y2="50" stroke="currentColor" strokeWidth="0.8" />
+            <line x1="20" y1="70" x2="50" y2="50" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2, 2" />
+            <line x1="80" y1="70" x2="50" y2="50" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2, 2" />
+            <line x1="50" y1="15" x2="50" y2="50" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2, 2" />
+            
+            {/* inner mesh points */}
+            <circle cx="50" cy="50" r="1.5" fill="#22d3ee" />
+            <circle cx="20" cy="30" r="1" fill="#22d3ee" />
+            <circle cx="50" cy="15" r="1" fill="#22d3ee" />
+            <circle cx="80" cy="30" r="1" fill="#22d3ee" />
+            <circle cx="80" cy="70" r="1" fill="#22d3ee" />
+            <circle cx="50" cy="85" r="1" fill="#22d3ee" />
+            <circle cx="20" cy="70" r="1" fill="#22d3ee" />
+          </svg>
+
+          {/* Laser Scanning Line */}
+          <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_rgba(34,211,238,0.8)] animate-scan-line" style={{ top: '15%' }} />
+          <span className="mt-4 text-[9px] font-mono text-cyan-400 tracking-widest uppercase animate-pulse">Analyzing Volume</span>
         </div>
       </div>
     </div>
@@ -311,31 +351,47 @@ function ModelScreen() {
   }, []);
 
   const rad = (angle * Math.PI) / 180;
-  const w = 120, h = 60, d = 20;
-  // Simple isometric box projection
+  const w_geom = 110;
+  // projection helpers
   const cos = Math.cos(rad), sin = Math.sin(rad);
   const px = (x: number, z: number) => x * cos - z * sin;
   const pz = (x: number, z: number) => x * sin + z * cos;
 
-  // 8 vertices of the box
+  // 6 vertices of the crystal octahedron (top, bottom, and 4 middle ring points)
   const v = [
-    [-w/2, -h/2, -d/2], [w/2, -h/2, -d/2], [w/2, h/2, -d/2], [-w/2, h/2, -d/2],
-    [-w/2, -h/2,  d/2], [w/2, -h/2,  d/2], [w/2, h/2,  d/2], [-w/2, h/2,  d/2],
+    [0, -100, 0],              // 0: Top Vertex
+    [0, 100, 0],               // 1: Bottom Vertex
+    [-w_geom/2, 0, -w_geom/2], // 2: Mid Front Left
+    [w_geom/2, 0, -w_geom/2],  // 3: Mid Front Right
+    [w_geom/2, 0, w_geom/2],   // 4: Mid Back Right
+    [-w_geom/2, 0, w_geom/2],  // 5: Mid Back Left
   ].map(([x, y, z]) => {
-    const rx = px(x, z!), rz = pz(x, z!);
-    return [rx * 0.7 + 240, y * 0.7 + rz * 0.35 + 160];
+    const rx = px(x, z!);
+    const rz = pz(x, z!);
+    return [rx * 0.8 + 240, y * 0.8 + rz * 0.35 + 160];
   });
 
   const faces = [
-    { verts: [4,5,6,7], fill: "rgba(99,102,241,0.25)", stroke: "rgba(99,102,241,0.6)" },
-    { verts: [1,2,6,5], fill: "rgba(139,92,246,0.20)", stroke: "rgba(139,92,246,0.5)" },
-    { verts: [0,1,5,4], fill: "rgba(6,182,212,0.15)",  stroke: "rgba(6,182,212,0.4)"  },
+    { verts: [0, 2, 3], fill: "rgba(99, 102, 241, 0.25)", stroke: "rgba(99, 102, 241, 0.75)" },
+    { verts: [0, 3, 4], fill: "rgba(139, 92, 246, 0.20)", stroke: "rgba(139, 92, 246, 0.65)" },
+    { verts: [0, 4, 5], fill: "rgba(6, 182, 212, 0.22)", stroke: "rgba(6, 182, 212, 0.70)" },
+    { verts: [0, 5, 2], fill: "rgba(168, 85, 247, 0.15)", stroke: "rgba(168, 85, 247, 0.60)" },
+    { verts: [1, 3, 2], fill: "rgba(99, 102, 241, 0.18)", stroke: "rgba(99, 102, 241, 0.60)" },
+    { verts: [1, 4, 3], fill: "rgba(139, 92, 246, 0.15)", stroke: "rgba(139, 92, 246, 0.50)" },
+    { verts: [1, 5, 4], fill: "rgba(6, 182, 212, 0.20)", stroke: "rgba(6, 182, 212, 0.65)" },
+    { verts: [1, 2, 5], fill: "rgba(168, 85, 247, 0.12)", stroke: "rgba(168, 85, 247, 0.55)" },
+  ];
+
+  const edges = [
+    [0, 2], [0, 3], [0, 4], [0, 5],
+    [1, 2], [1, 3], [1, 4], [1, 5],
+    [2, 3], [3, 4], [4, 5], [5, 2]
   ];
 
   const pt = (i: number) => `${v[i][0]},${v[i][1]}`;
 
   return (
-    <div className="flex items-center justify-center p-6 h-full min-h-[320px]">
+    <div className="flex items-center justify-center p-6 h-full min-h-[340px]">
       <div className="flex items-center gap-6 w-full max-w-lg">
         {/* 3D SVG preview */}
         <div className="flex-shrink-0 w-[180px] h-[180px] relative flex items-center justify-center">
@@ -343,30 +399,37 @@ function ModelScreen() {
           <svg width="180" height="180" viewBox="0 0 480 320" className="drop-shadow-2xl">
             {/* Grid lines */}
             {[...Array(7)].map((_, i) => (
-              <line key={i} x1={i*80} y1="0" x2={i*80} y2="320" stroke="#1e293b" strokeWidth="1" />
+              <line key={i} x1={i*80} y1="0" x2={i*80} y2="320" stroke="#1e293b" strokeWidth="0.8" opacity="0.6" />
             ))}
             {[...Array(5)].map((_, i) => (
-              <line key={i} x1="0" y1={i*80} x2="480" y2={i*80} stroke="#1e293b" strokeWidth="1" />
+              <line key={i} x1="0" y1={i*80} x2="480" y2={i*80} stroke="#1e293b" strokeWidth="0.8" opacity="0.6" />
             ))}
+
+            {/* Orbiting rings */}
+            <ellipse cx="240" cy="160" rx="140" ry="40" fill="none" stroke="rgba(6, 182, 212, 0.25)" strokeWidth="1" strokeDasharray="6, 6" />
+            <ellipse cx="240" cy="160" rx="110" ry="25" fill="none" stroke="rgba(139, 92, 246, 0.15)" strokeWidth="0.8" />
+
+            {/* Faces */}
             {faces.map((f, i) => (
               <polygon
                 key={i}
                 points={f.verts.map(pt).join(" ")}
                 fill={f.fill}
                 stroke={f.stroke}
-                strokeWidth="1.5"
+                strokeWidth="1.2"
               />
             ))}
+
             {/* Edges */}
-            {[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].map(([a,b],i) => (
+            {edges.map(([a,b], i) => (
               <line key={i} x1={v[a][0]} y1={v[a][1]} x2={v[b][0]} y2={v[b][1]}
-                stroke="rgba(99,102,241,0.35)" strokeWidth="1" />
+                stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
             ))}
           </svg>
         </div>
 
         {/* Info panel */}
-        <div className="flex-1 flex flex-col gap-3">
+        <div className="flex-1 flex flex-col gap-2.5">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-white">model.glb</span>
             <span className="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded-full">Generated</span>
@@ -377,12 +440,12 @@ function ModelScreen() {
             { label: "Texture",  val: "1024 × 1024", color: "#f0abfc" },
             { label: "Format",   val: "GLB (Binary GLTF)", color: "#86efac" },
           ].map((item, i) => (
-            <div key={i} className="flex justify-between items-center py-1.5 border-b border-gray-800/40 last:border-0">
-              <span className="text-[11px] text-gray-500 font-mono">{item.label}</span>
-              <span className="text-[11px] font-semibold font-mono" style={{ color: item.color }}>{item.val}</span>
+            <div key={i} className="flex justify-between items-center py-1.5 border-b border-gray-800/45 last:border-0">
+              <span className="text-[10px] text-gray-500 font-mono">{item.label}</span>
+              <span className="text-[10px] font-semibold font-mono" style={{ color: item.color }}>{item.val}</span>
             </div>
           ))}
-          <button className="mt-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-xs font-bold shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30 transition-all">
+          <button className="mt-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-xs font-bold shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30 transition-all">
             <Download className="w-3.5 h-3.5" />
             Download GLB
           </button>

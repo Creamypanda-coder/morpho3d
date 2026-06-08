@@ -774,11 +774,8 @@ export default function LandingPage() {
                   {/* Bio */}
                   <div>
                     <p className="text-xs font-bold tracking-widest text-violet-400 uppercase mb-3 font-mono">About Me</p>
-                    <p className="text-gray-300 text-sm leading-relaxed mb-3">
-                      I am an IT Engineer, Network Specialist, and QA Services Professional with a deep passion for building reliable, secure, and high-performance IT infrastructure. Armed with experience in network management, system maintenance, troubleshooting, and quality assurance, I always strive to deliver efficient technology solutions that ensure stability, scalability, and operational excellence.
-                    </p>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      My primary focus lies in managing and optimizing IT infrastructure, network systems, and QA services to ensure secure, stable, and efficient operations — while also building modern web & mobile applications.
+                    <p className="text-gray-300 text-sm leading-relaxed">
+                      IT Engineer &amp; QA Specialist focused on building secure network infrastructure, optimizing system stability, and developing modern web/mobile applications.
                     </p>
                   </div>
 

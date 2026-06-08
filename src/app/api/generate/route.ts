@@ -12,7 +12,11 @@ async function runGradioEndpoint(spaceHost: string, fnIndex: number, data: any[]
     headers["Authorization"] = `Bearer ${hfToken}`;
   }
 
-  const joinRes = await fetch(`${spaceHost}/queue/join`, {
+  // Gradio v5 (Trellis) uses the /gradio_api prefix for queue endpoints
+  const isGradioV5 = spaceHost.includes("trellis");
+  const prefix = isGradioV5 ? "/gradio_api" : "";
+
+  const joinRes = await fetch(`${spaceHost}${prefix}/queue/join`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -38,7 +42,7 @@ async function runGradioEndpoint(spaceHost: string, fnIndex: number, data: any[]
   }
 
   const streamRes = await fetch(
-    `${spaceHost}/queue/data?session_hash=${sessionHash}`,
+    `${spaceHost}${prefix}/queue/data?session_hash=${sessionHash}`,
     { 
       method: "GET",
       headers: streamHeaders
@@ -270,11 +274,336 @@ export async function POST(req: NextRequest) {
       return glbOutput.url;
     };
 
+    // Function to run Microsoft Trellis Pipeline (SOTA High-Quality)
+    const runTrellis = async () => {
+      const spaceHost = "https://trellis-community-trellis.hf.space";
+      console.log(`[API Generate] Initiating Microsoft TRELLIS pipeline`);
+
+      // 1. Upload the image file using Gradio v5 upload endpoint
+      const blob = new Blob([fileData as any], { type: mimeType });
+      const formData = new FormData();
+      formData.append("files", blob, filename);
+
+      const uploadHeaders: Record<string, string> = {};
+      if (hfToken) {
+        uploadHeaders["Authorization"] = `Bearer ${hfToken}`;
+      }
+
+      console.log("[API Generate] Uploading source image to TRELLIS space...");
+      const uploadRes = await fetch(`${spaceHost}/gradio_api/upload`, {
+        method: "POST",
+        headers: uploadHeaders,
+        body: formData
+      });
+      
+      if (!uploadRes.ok) {
+        throw new Error(`Hugging Face upload failed for TRELLIS: ${uploadRes.statusText}`);
+      }
+      
+      const uploadData = await uploadRes.json();
+      const uploadedFileUrl = uploadData[0];
+      console.log(`[API Generate] Image uploaded. Temp path: ${uploadedFileUrl}`);
+
+      // Construct file URL so the ZeroGPU worker can download the resource
+      const fileUrl = `${spaceHost}/gradio_api/file=${uploadedFileUrl}`;
+
+      // 2. Generate 3D Reconstruction (fn_index: 11)
+      console.log("[API Generate] Running TRELLIS Generate (3D reconstruction & GLB extraction)...");
+      const generateResult = await runGradioEndpoint(spaceHost, 11, [
+        {
+          path: uploadedFileUrl,
+          url: fileUrl,
+          orig_name: filename,
+          meta: { _type: "gradio.FileData" }
+        }, // image (6)
+        [], // multiimages (8)
+        null, // state (39)
+        0, // seed (11)
+        7.5, // ss_guidance_strength (15)
+        12, // ss_sampling_steps (16)
+        3.0, // slat_guidance_strength (20)
+        12, // slat_sampling_steps (21)
+        "stochastic", // multiimage_algo (23)
+        0.95, // mesh_simplify (27)
+        1024 // texture_size (28)
+      ], hfToken);
+
+      const glbOutput = generateResult ? generateResult[1] : null;
+      if (!glbOutput || !glbOutput.url) {
+        throw new Error("TRELLIS generation failed: No GLB URL returned.");
+      }
+
+      return glbOutput.url;
+    };
+
+    // Function to run Tripo AI Platform API (Commercial SOTA)
+    const runTripoAPI = async () => {
+      const tripoApiKey = process.env.TRIPO_API_KEY;
+      if (!tripoApiKey) {
+        throw new Error("TRIPO_API_KEY is not configured in .env.local");
+      }
+
+      console.log(`[API Generate] Initiating Tripo AI Platform API pipeline`);
+
+      // 1. Upload the file to Tripo
+      const blob = new Blob([fileData as any], { type: mimeType });
+      const formData = new FormData();
+      formData.append("file", blob, filename);
+
+      console.log("[API Generate] Uploading source image to Tripo API...");
+      const uploadRes = await fetch("https://api.tripo3d.ai/v2/openapi/upload", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${tripoApiKey}`
+        },
+        body: formData
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error(`Tripo upload failed: ${uploadRes.statusText}`);
+      }
+
+      const uploadData = await uploadRes.json();
+      if (uploadData.code !== 0 || !uploadData.data?.image_token) {
+        throw new Error(`Tripo upload returned error: ${uploadData.message || "Unknown error"}`);
+      }
+
+      const imageToken = uploadData.data.image_token;
+      console.log(`[API Generate] Image uploaded to Tripo. Token: ${imageToken}`);
+
+      // 2. Submit image_to_model task
+      console.log("[API Generate] Creating Tripo image_to_model generation task...");
+      const taskRes = await fetch("https://api.tripo3d.ai/v2/openapi/task", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${tripoApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          type: "image_to_model",
+          file: {
+            type: mimeType.split("/")[1] || "png",
+            file_token: imageToken
+          }
+        })
+      });
+
+      if (!taskRes.ok) {
+        throw new Error(`Tripo task creation failed: ${taskRes.statusText}`);
+      }
+
+      const taskData = await taskRes.json();
+      if (taskData.code !== 0 || !taskData.data?.task_id) {
+        throw new Error(`Tripo task creation returned error: ${taskData.message || "Unknown error"}`);
+      }
+
+      const taskId = taskData.data.task_id;
+      console.log(`[API Generate] Tripo task created. ID: ${taskId}. Polling for completion...`);
+
+      // 3. Poll task status until complete
+      const maxRetries = 40; // 40 * 2 seconds = 80 seconds max
+      let retries = 0;
+      let finalModelUrl: string | null = null;
+
+      while (retries < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        retries++;
+
+        const pollRes = await fetch(`https://api.tripo3d.ai/v2/openapi/task/${taskId}`, {
+          headers: {
+            "Authorization": `Bearer ${tripoApiKey}`
+          }
+        });
+
+        if (!pollRes.ok) {
+          console.warn(`[API Generate] Tripo polling request failed (attempt ${retries}): ${pollRes.statusText}`);
+          continue;
+        }
+
+        const pollData = await pollRes.json();
+        if (pollData.code !== 0 || !pollData.data) {
+          throw new Error(`Tripo polling returned error: ${pollData.message || "Unknown error"}`);
+        }
+
+        const status = pollData.data.status;
+        console.log(`[API Generate] Tripo task ${taskId} status: ${status} (attempt ${retries})`);
+
+        if (status === "success") {
+          finalModelUrl = pollData.data.output?.pbr_model || pollData.data.result?.pbr_model?.url;
+          break;
+        }
+
+        if (status === "failed" || status === "cancelled" || status === "banned") {
+          throw new Error(`Tripo generation failed with status: ${status}`);
+        }
+      }
+
+      if (!finalModelUrl) {
+        throw new Error("Tripo generation timed out or returned no model URL.");
+      }
+
+      console.log(`[API Generate] Tripo model generated successfully: ${finalModelUrl}`);
+      return finalModelUrl;
+    };
+
+    // Function to run local GPU generation via child process (TripoSR local)
+    const runLocalGPU = async () => {
+      console.log(`[API Generate] Initiating Local GPU pipeline`);
+      
+      const { spawn } = require("child_process");
+      
+      let localInputPath = "";
+      let isTempInput = false;
+
+      if (imagePath.startsWith("data:")) {
+        localInputPath = path.join(os.tmpdir(), `toms3d-input-${Date.now()}.png`);
+        await fs.writeFile(localInputPath, fileData);
+        isTempInput = true;
+      } else {
+        if (imagePath.startsWith("/api/uploads/")) {
+          const fname = imagePath.substring("/api/uploads/".length);
+          localInputPath = path.join(os.tmpdir(), "toms3d-uploads", fname);
+        } else {
+          const relativeImagePath = imagePath.replace(/^\//, "");
+          localInputPath = path.join(process.cwd(), "public", relativeImagePath);
+        }
+      }
+
+      const localOutputPath = path.join(os.tmpdir(), `toms3d-output-${Date.now()}.glb`);
+
+      console.log(`[API Generate] Local GPU input: ${localInputPath}`);
+      console.log(`[API Generate] Local GPU output: ${localOutputPath}`);
+
+      const scriptPath = path.join(process.cwd(), "scripts", "local_generate.py");
+
+      return new Promise<string>((resolve, reject) => {
+        // Run Python process in system environment
+        const py = spawn("python", [scriptPath, localInputPath, localOutputPath]);
+        let stdoutData = "";
+        let stderrData = "";
+
+        py.stdout.on("data", (data: any) => {
+          stdoutData += data.toString();
+        });
+
+        py.stderr.on("data", (data: any) => {
+          stderrData += data.toString();
+        });
+
+        py.on("close", async (code: number) => {
+          if (isTempInput) {
+            try { await fs.unlink(localInputPath); } catch {}
+          }
+
+          console.log(`[API Generate] Local GPU process exited with code ${code}`);
+          if (code !== 0) {
+            return reject(new Error(`Local generator process failed. Stderr: ${stderrData || "Check python setup"}`));
+          }
+
+          const lines = stdoutData.split("\n").filter(Boolean);
+          let scriptError = "";
+          let setupGuide = "";
+
+          for (const line of lines) {
+            try {
+              const res = JSON.parse(line);
+              if (res.status === "error") {
+                scriptError = res.message;
+                setupGuide = res.details;
+              } else if (res.status === "progress") {
+                console.log(`[API Generate] [Local GPU Progress] ${res.message}`);
+              }
+            } catch {
+              // Ignore non-JSON output
+            }
+          }
+
+          if (scriptError) {
+            return reject(new Error(`${scriptError} Setup Guide: ${setupGuide || "None"}`));
+          }
+
+          try {
+            await fs.access(localOutputPath);
+            resolve(localOutputPath);
+          } catch {
+            reject(new Error("Local GPU generation finished but output GLB file is missing."));
+          }
+        });
+
+        py.on("error", (err: any) => {
+          reject(new Error(`Failed to start local Python process: ${err.message}`));
+        });
+      });
+    };
+
     let selectedModel = modelType;
     let finalModelUrl: string;
     let fallbackTriggered = false;
 
-    if (selectedModel === "stable-fast-3d") {
+    if (selectedModel === "local-gpu") {
+      try {
+        finalModelUrl = await runLocalGPU();
+      } catch (err: any) {
+        console.warn("[API Generate] Local GPU failed. Falling back to Tripo API. Error:", err.message);
+        fallbackTriggered = true;
+        selectedModel = "tripo-api";
+        try {
+          finalModelUrl = await runTripoAPI();
+        } catch (subErr: any) {
+          console.warn("[API Generate] Tripo API fallback failed. Falling back to Microsoft TRELLIS. Error:", subErr.message);
+          selectedModel = "trellis";
+          try {
+            finalModelUrl = await runTrellis();
+          } catch (thirdErr: any) {
+            console.warn("[API Generate] Microsoft TRELLIS fallback failed. Falling back to Stable Fast 3D. Error:", thirdErr.message);
+            selectedModel = "stable-fast-3d";
+            try {
+              finalModelUrl = await runStableFast3D();
+            } catch (fourthErr: any) {
+              console.warn("[API Generate] Stable Fast 3D fallback failed. Falling back to TripoSR. Error:", fourthErr.message);
+              selectedModel = "triposr";
+              finalModelUrl = await runTripoSR();
+            }
+          }
+        }
+      }
+    } else if (selectedModel === "tripo-api") {
+      try {
+        finalModelUrl = await runTripoAPI();
+      } catch (err: any) {
+        console.warn("[API Generate] Tripo API failed. Falling back to Microsoft TRELLIS. Error:", err.message);
+        fallbackTriggered = true;
+        selectedModel = "trellis";
+        try {
+          finalModelUrl = await runTrellis();
+        } catch (subErr: any) {
+          console.warn("[API Generate] Microsoft TRELLIS fallback failed. Falling back to Stable Fast 3D. Error:", subErr.message);
+          selectedModel = "stable-fast-3d";
+          try {
+            finalModelUrl = await runStableFast3D();
+          } catch (thirdErr: any) {
+            console.warn("[API Generate] Stable Fast 3D fallback failed. Falling back to TripoSR. Error:", thirdErr.message);
+            selectedModel = "triposr";
+            finalModelUrl = await runTripoSR();
+          }
+        }
+      }
+    } else if (selectedModel === "trellis") {
+      try {
+        finalModelUrl = await runTrellis();
+      } catch (err: any) {
+        console.warn("[API Generate] Microsoft TRELLIS failed. Falling back to Stable Fast 3D. Error:", err.message);
+        fallbackTriggered = true;
+        selectedModel = "stable-fast-3d";
+        try {
+          finalModelUrl = await runStableFast3D();
+        } catch (subErr: any) {
+          console.warn("[API Generate] Stable Fast 3D fallback failed. Falling back to TripoSR. Error:", subErr.message);
+          selectedModel = "triposr";
+          finalModelUrl = await runTripoSR();
+        }
+      }
+    } else if (selectedModel === "stable-fast-3d") {
       try {
         finalModelUrl = await runStableFast3D();
       } catch (err: any) {
@@ -287,13 +616,27 @@ export async function POST(req: NextRequest) {
       finalModelUrl = await runTripoSR();
     }
 
-    // Download final model
-    console.log(`[API Generate] Downloading final model from ${finalModelUrl}`);
-    const downloadRes = await fetch(finalModelUrl);
-    if (!downloadRes.ok) {
-      throw new Error(`Failed to download model from ${finalModelUrl}: ${downloadRes.statusText}`);
+    // Serve model (Download from remote URL or read from local disk)
+    let glbBuffer: ArrayBuffer;
+    if (finalModelUrl.startsWith("http://") || finalModelUrl.startsWith("https://")) {
+      console.log(`[API Generate] Downloading final model from ${finalModelUrl}`);
+      const downloadRes = await fetch(finalModelUrl);
+      if (!downloadRes.ok) {
+        throw new Error(`Failed to download model from ${finalModelUrl}: ${downloadRes.statusText}`);
+      }
+      glbBuffer = await downloadRes.arrayBuffer();
+    } else {
+      console.log(`[API Generate] Reading local generated model from disk: ${finalModelUrl}`);
+      const fileBuffer = await fs.readFile(finalModelUrl);
+      glbBuffer = fileBuffer.buffer.slice(
+        fileBuffer.byteOffset,
+        fileBuffer.byteOffset + fileBuffer.byteLength
+      );
+      // Cleanup local temp GLB file
+      try {
+        await fs.unlink(finalModelUrl);
+      } catch {}
     }
-    const glbBuffer = await downloadRes.arrayBuffer();
     console.log("[API Generate] Responding with GLB binary payload.");
 
     return new NextResponse(glbBuffer, {

@@ -35,6 +35,7 @@ const ModelViewer = dynamic(() => import("@/components/ModelViewer"), {
 });
 
 const SOURCE_BADGES: Record<string, { label: string; color: string }> = {
+  gemini: { label: "Google Gemini Vision", color: "text-sky-400 bg-sky-950/40 border-sky-500/20" },
   openai: { label: "OpenAI GPT-4o Vision", color: "text-emerald-400 bg-emerald-950/40 border-emerald-500/20" },
   llava: { label: "LLaVA-1.5 Vision", color: "text-indigo-400 bg-indigo-950/40 border-indigo-500/20" },
   blip2: { label: "BLIP-2 Vision", color: "text-violet-400 bg-violet-950/40 border-violet-500/20" },
@@ -44,6 +45,7 @@ const SOURCE_BADGES: Record<string, { label: string; color: string }> = {
 export default function Dashboard() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const glbInputRef = useRef<HTMLInputElement>(null);
   
   // App States
   const [imagePath, setImagePath] = useState<string | null>(null);
@@ -52,11 +54,46 @@ export default function Dashboard() {
   const [modelPath, setModelPath] = useState<string | null>(null);
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [dragActive, setDragActive] = useState(false);
-  const [modelType, setModelType] = useState<string>("stable-fast-3d");
+  const [modelType, setModelType] = useState<string>("local-gpu");
 
   const addLog = useCallback((msg: string) => {
     setConsoleLogs((prev) => [...prev, msg]);
   }, []);
+
+  const handleGlbImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".glb")) {
+      toast("Invalid file type. Please select a model in GLB format.", "error", "Invalid Format");
+      return;
+    }
+
+    try {
+      if (modelPath && modelPath.startsWith("blob:")) {
+        URL.revokeObjectURL(modelPath);
+      }
+      
+      const localUrl = URL.createObjectURL(file);
+      setModelPath(localUrl);
+      
+      e.target.value = "";
+      
+      toast(`Successfully loaded ${file.name} visually!`, "success", "Model Loaded");
+      addLog(`[SYSTEM] Imported local GLB model: ${file.name}`);
+    } catch (err: any) {
+      toast(`Failed to load GLB file: ${err.message}`, "error", "Import Failed");
+    }
+  };
+
+  const handleClearModel = () => {
+    if (modelPath && modelPath.startsWith("blob:")) {
+      URL.revokeObjectURL(modelPath);
+    }
+    setModelPath(null);
+    toast("3D viewport has been reset.", "info", "Viewport Reset");
+    addLog("[SYSTEM] 3D viewport cleared.");
+  };
 
   // File Upload Mutation
   const uploadMutation = useMutation({
@@ -126,7 +163,13 @@ export default function Dashboard() {
       setConsoleLogs([
         "[SYSTEM] Initializing 3D Reconstruction Pipeline...",
         `[INFO] Source Image: ${path}`,
-        `[INFO] Model: ${modelType === "stable-fast-3d" ? "Stable Fast 3D (High-Fidelity)" : "TripoSR (Standard)"}`,
+        `[INFO] Model: ${
+          modelType === "local-gpu" ? "Local GPU (TripoSR Offline)" :
+          modelType === "tripo-api" ? "Tripo AI API (Commercial SOTA)" :
+          modelType === "trellis" ? "Microsoft TRELLIS (High-Quality)" :
+          modelType === "stable-fast-3d" ? "Stable Fast 3D (Fast)" : 
+          "TripoSR (Standard)"
+        }`,
         analysis
           ? `[INFO] AI Analysis context loaded (${SOURCE_BADGES[analysisSource]?.label || "AI Vision"}) — guiding reconstruction.`
           : "[INFO] No analysis context. Upload and analyze image first for best results.",
@@ -176,10 +219,21 @@ export default function Dashboard() {
       setModelPath(data.modelPath);
       
       if (data.fallbackTriggered) {
-        addLog(`[WARNING] High-Fidelity model hit ZeroGPU limits — fell back to TripoSR.`);
-        addLog(`[TIP] Add HF_TOKEN to .env.local for unlimited Stable Fast 3D generations.`);
+        addLog(`[WARNING] Model pipeline hit limits or failed — fell back to ${
+          data.modelUsed === "tripo-api" ? "Tripo AI API" :
+          data.modelUsed === "trellis" ? "Microsoft TRELLIS" :
+          data.modelUsed === "stable-fast-3d" ? "Stable Fast 3D" : 
+          "TripoSR"
+        }.`);
+        addLog(`[TIP] Local GPU requires Python/CUDA. Try checking server logs for detailed local GPU setup guides.`);
       } else {
-        addLog(`[SUCCESS] Generation complete using ${data.modelUsed === "stable-fast-3d" ? "Stable Fast 3D" : "TripoSR"}.`);
+        addLog(`[SUCCESS] Generation complete using ${
+          data.modelUsed === "local-gpu" ? "Local GPU (TripoSR)" :
+          data.modelUsed === "tripo-api" ? "Tripo AI API" :
+          data.modelUsed === "trellis" ? "Microsoft TRELLIS" :
+          data.modelUsed === "stable-fast-3d" ? "Stable Fast 3D" : 
+          "TripoSR"
+        }.`);
       }
       addLog(`[SYSTEM] 3D model saved → ${data.modelPath}`);
       toast("3D GLB model generated successfully!", "success", "Generation Complete");
@@ -434,9 +488,28 @@ export default function Dashboard() {
                     onChange={(e) => setModelType(e.target.value)}
                     className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs font-mono text-cyan-400 focus:outline-none focus:border-cyan-500 transition-colors"
                   >
-                    <option value="stable-fast-3d">⚡ High-Fidelity — Stable Fast 3D</option>
+                    <option value="local-gpu">💻 Local GPU — TripoSR (NVIDIA CUDA)</option>
+                    <option value="tripo-api">🔥 SOTA Commercial — Tripo AI API</option>
+                    <option value="trellis">✨ High-Quality — Microsoft TRELLIS</option>
+                    <option value="stable-fast-3d">⚡ Fast — Stable Fast 3D</option>
                     <option value="triposr">🔷 Standard — TripoSR</option>
                   </select>
+
+                  {modelType === "local-gpu" && (
+                    <div className="mt-2 p-2 rounded-lg bg-cyan-950/20 border border-cyan-800/30 flex flex-col gap-1.5">
+                      <span className="text-[9px] text-cyan-400/80 font-mono leading-relaxed">
+                        Pertama kali menggunakan Local GPU? Unduh installer ini untuk mengaktifkan dukungan CUDA di PC Anda secara otomatis.
+                      </span>
+                      <a
+                        href="/install_cuda_deps.bat"
+                        download="install_cuda_deps.bat"
+                        className="px-2.5 py-1 text-center rounded bg-cyan-950 hover:bg-cyan-900 border border-cyan-800 text-[10px] text-cyan-400 font-bold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-cyan-950/30"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Unduh Script Setup GPU (.bat)
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 <button
@@ -488,15 +561,41 @@ export default function Dashboard() {
               <Box className="w-4 h-4 text-cyan-400" />
               <h2 className="text-sm font-bold text-gray-200">3D Workspace Viewport</h2>
             </div>
-            {modelPath && (
+            <div className="flex items-center gap-2">
+              <input
+                ref={glbInputRef}
+                type="file"
+                className="hidden"
+                accept=".glb"
+                onChange={handleGlbImport}
+              />
               <button
-                onClick={handleDownload}
-                className="px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg hover:shadow-emerald-500/20 hover:from-emerald-400 hover:to-teal-400 transition-all flex items-center gap-1.5 border border-emerald-500/20"
+                onClick={() => glbInputRef.current?.click()}
+                className="px-3 py-1.5 text-xs font-bold rounded-xl bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-300 hover:text-white transition-all flex items-center gap-1.5"
+                title="Import local GLB file for visual inspection"
               >
-                <Download className="w-3 h-3" />
-                Download GLB
+                <Upload className="w-3.5 h-3.5 text-cyan-400" />
+                Import GLB
               </button>
-            )}
+              {modelPath && (
+                <>
+                  <button
+                    onClick={handleDownload}
+                    className="px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg hover:shadow-emerald-500/20 hover:from-emerald-400 hover:to-teal-400 transition-all flex items-center gap-1.5 border border-emerald-500/20"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Download GLB
+                  </button>
+                  <button
+                    onClick={handleClearModel}
+                    className="px-3 py-1.5 text-xs font-bold rounded-xl bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-900/40 transition-all"
+                    title="Clear model viewer"
+                  >
+                    Reset
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Viewport container — fills remaining height */}

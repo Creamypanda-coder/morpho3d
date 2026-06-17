@@ -1,5 +1,34 @@
 @import "tailwindcss";
 
+@theme {
+  --font-podium: "FSP DEMO - PODIUM Sharp 4.11", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  --animate-fade-up: fade-up 0.8s ease-out forwards;
+  --animate-fade-up-delay-1: fade-up 0.8s ease-out 0.2s forwards;
+  --animate-fade-up-delay-2: fade-up 0.8s ease-out 0.4s forwards;
+  --animate-fade-up-delay-3: fade-up 0.8s ease-out 0.6s forwards;
+  --animate-fade-up-delay-4: fade-up 0.8s ease-out 0.8s forwards;
+  --animate-fade-in: fadeIn 0.8s ease-out forwards;
+  --animate-fade-in-delay: fadeIn 0.8s ease-out 0.2s forwards;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  --animate-eq-1: eq-1 0.8s ease-in-out infinite;
+  --animate-eq-2: eq-2 0.6s ease-in-out infinite;
+  --animate-eq-3: eq-3 1.1s ease-in-out infinite;
+  --animate-eq-4: eq-4 0.7s ease-in-out infinite;
+
+  @keyframes eq-1 { 0%, 100% { height: 25%; } 50% { height: 100%; } }
+  @keyframes eq-2 { 0%, 100% { height: 50%; } 50% { height: 100%; } }
+  @keyframes eq-3 { 0%, 100% { height: 18%; } 50% { height: 100%; } }
+  @keyframes eq-4 { 0%, 100% { height: 37%; } 50% { height: 100%; } }
+}
+
+
 :root {
   --background: #030014;
   --foreground: #f8fafc;
@@ -151,21 +180,22 @@ body {
 }
 
 /* utility classes */
+
 .animate-fade-in-up   { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .animate-fade-in      { animation: fadeIn  0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .animate-scale-in     { animation: scaleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-float        { animation: float 5s ease-in-out infinite; will-change: transform; }
-.animate-float-slow   { animation: float-slow 7s ease-in-out infinite; will-change: transform; }
-.animate-glow-pulse   { animation: glowPulse 6s ease-in-out infinite; will-change: opacity, transform; }
-.animate-spin-slow    { animation: spinSlow 30s linear infinite; will-change: transform; }
+.animate-float        { /* Static: no float animation to optimize GPU/CPU */ }
+.animate-float-slow   { /* Static: no float animation to optimize GPU/CPU */ }
+.animate-glow-pulse   { /* Static: no pulsing animation to optimize GPU/CPU */ }
+.animate-spin-slow    { /* Static: no rotation animation to optimize GPU/CPU */ }
 .animate-blink-cursor { animation: blinkCursor 1s step-end infinite; }
 .animate-slide-left   { animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.animate-scan-line    { animation: scanLineAnim 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite; will-change: transform; }
-.animate-scan-viewport{ animation: scanLineViewport 3s linear infinite; will-change: transform; }
-.animate-holo-rotate  { animation: holoRotation 12s linear infinite; transform-style: preserve-3d; will-change: transform; }
-.animate-pulse-cyan   { animation: pulseGlowCyan 3s ease-in-out infinite; will-change: opacity; }
-.animate-pulse-purple { animation: pulseGlowPurple 3s ease-in-out infinite; will-change: opacity; }
-.animate-pulse-magenta{ animation: pulseGlowMagenta 3s ease-in-out infinite; will-change: opacity; }
+.animate-scan-line    { /* Disabled scan-line animation for performance */ }
+.animate-scan-viewport { animation: scanLineViewport 3s linear infinite; }
+.animate-holo-rotate  { animation: holoRotation 12s linear infinite; }
+.animate-pulse-cyan   { /* Static: no pulsing glow */ }
+.animate-pulse-purple { /* Static: no pulsing glow */ }
+.animate-pulse-magenta{ /* Static: no pulsing glow */ }
 
 /* Pause animations when tab is hidden (applied via JS) */
 .animations-paused,
@@ -195,20 +225,17 @@ body {
     #818cf8 75%,
     #38bdf8 100%
   );
-  background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shimmer 5s linear infinite;
+  /* Removed animation to prevent infinite layout calculations */
 }
 
 /* =====================
-   Premium Glassmorphism
+   Premium Glassmorphism (Optimized: backdrop blurs removed for performance)
    ===================== */
 .glass-card {
-  background: rgba(10, 8, 28, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 8, 28, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 
     0 4px 30px rgba(0, 0, 0, 0.4),
@@ -218,10 +245,10 @@ body {
 }
 
 .glass-card-hover {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 .glass-card-hover:hover {
-  background: rgba(15, 12, 40, 0.6);
+  background: rgba(15, 12, 40, 0.98);
   border-color: rgba(99, 102, 241, 0.25);
   box-shadow: 
     0 10px 40px -10px rgba(99, 102, 241, 0.15),
@@ -237,35 +264,23 @@ body {
   transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
 }
 
-/* Volumetric light mesh overlay */
+/* Volumetric light mesh overlay (Optimized: static to avoid layout/paint overhead) */
 .interactive-mesh-bg {
-  background-image: 
-    radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(99, 102, 241, 0.12) 0%, transparent 45%),
-    radial-gradient(circle at calc(var(--mouse-x, 50%) - 10%) calc(var(--mouse-y, 50%) + 10%), rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at calc(var(--mouse-x, 50%) + 15%) calc(var(--mouse-y, 50%) - 10%), rgba(168, 85, 247, 0.08) 0%, transparent 40%);
-  transition: background-image 0.1s ease-out;
+  background: #030014;
 }
 
 .grid-overlay-parallax {
   background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 50px 50px;
   background-position: 50% 50%;
-  animation: gridScroll 60s linear infinite;
+  /* Removed gridScroll infinite animation to optimize scroll latency */
 }
 
 .starfield {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  opacity: 0.65;
+  display: none; /* Removed completely to save CPU/GPU cycle */
 }
 .starfield-particle {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: white;
-  border-radius: 50%;
-  animation: particleMove 12s infinite linear;
+  display: none;
 }
 
 /* =====================
@@ -273,8 +288,7 @@ body {
    ===================== */
 .demo-screen {
   border-radius: 20px;
-  background: rgba(4, 2, 18, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(4, 2, 18, 0.97);
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow:
     0 0 0 1px rgba(99, 102, 241, 0.05),
@@ -289,9 +303,8 @@ body {
   position: absolute;
   inset: 0;
   background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.02) 45%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.02) 55%, transparent 60%);
-  background-size: 200% 100%;
-  animation: shimmer 6s infinite linear;
   pointer-events: none;
+  /* Removed shimmer animation loop */
 }
 
 .step-active-glow {
@@ -318,14 +331,36 @@ body {
 
 .perspective-grid-floor {
   background-image: 
-    linear-gradient(rgba(6, 182, 212, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.075) 1px, transparent 1px);
   background-size: 40px 40px;
   background-position: center;
   transform: perspective(300px) rotateX(75deg) scale(2.2);
   transform-origin: center center;
-  opacity: 0.65;
+  opacity: 0.95;
 }
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.5;
+  }
+  85% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-160px) scale(1);
+    opacity: 0;
+  }
+}
+
+.animate-particle-float {
+  animation: particleFloat infinite linear;
+}
+
 
 .xyz-coordinate-axis {
   position: absolute;

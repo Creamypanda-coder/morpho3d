@@ -27,9 +27,9 @@ import {
 const ModelViewer = dynamic(() => import("@/components/ModelViewer"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 rounded-2xl">
-      <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-      <p className="mt-3 text-xs text-gray-500 font-mono">Initializing 3D Engine...</p>
+    <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950/30 border border-white/[0.08] rounded-2xl backdrop-blur-xl">
+      <Loader2 className="w-6 h-6 text-zinc-400 animate-spin" />
+      <p className="mt-3 text-[10px] text-neutral-400 font-mono tracking-wider">INITIALIZING 3D ENGINE...</p>
     </div>
   ),
 });
@@ -329,70 +329,84 @@ export default function Dashboard() {
   };
 
   const sourceBadge = SOURCE_BADGES[analysisSource] || SOURCE_BADGES["local"];
-  const isWorking = uploadMutation.isPending || analyzeMutation.isPending || generateMutation.isPending;
-
   return (
-    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", background: "#000000", overflow: "hidden" }}>
+    <div className="relative w-full h-screen h-[100dvh] overflow-hidden bg-gradient-to-tr from-[#94a3b8] via-[#cbd5e1] to-[#94a3b8] select-none text-slate-800 flex flex-col font-inter">
+      {/* Background Ambient Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-300/15 blur-[130px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-sky-300/25 blur-[130px] pointer-events-none z-0" />
+      <div className="absolute top-[30%] right-[20%] w-[45%] h-[45%] rounded-full bg-white/20 blur-[120px] pointer-events-none z-0" />
+
+      {/* Professional 3D workbench grid background overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.15] z-0">
+        <div 
+          className="absolute inset-0" 
+          style={{
+            backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px)",
+            backgroundSize: "24px 24px"
+          }} 
+        />
+      </div>
+
       {/* Top Navbar */}
-      <header className="border-b border-gray-900 bg-black/70 backdrop-blur-md z-40 px-4 py-3 flex items-center justify-between flex-shrink-0">
+      <header className="relative z-40 border-b border-white/40 bg-white/20 backdrop-blur-md px-6 py-3.5 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <Link 
             href="/" 
-            className="p-2 rounded-lg bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-400 hover:text-gray-200 transition-colors"
+            className="p-2 rounded-xl bg-white/40 hover:bg-white/60 border border-white/50 text-slate-800 hover:text-slate-950 transition-all duration-300 backdrop-blur-sm shadow-sm"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-base tracking-tight bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="font-podium font-bold uppercase text-lg tracking-wider text-slate-900">
               Toms 3D
             </span>
-            <span className="text-xs bg-gray-900 border border-gray-800 px-2 py-0.5 rounded text-cyan-400 font-mono">
+            <span className="text-[10px] font-bold bg-slate-900/5 border border-slate-900/10 px-2 py-0.5 rounded text-slate-800 tracking-widest uppercase font-mono">
               WORKSTATION
             </span>
-            <span className="text-[9px] font-bold bg-amber-500/10 border border-amber-500/25 px-1.5 py-0.5 rounded text-amber-400 font-mono">
+            <span className="text-[9px] font-bold bg-slate-900/10 border border-slate-900/15 px-1.5 py-0.5 rounded text-slate-800 font-mono tracking-widest uppercase animate-pulse">
               BETA
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {/* Pipeline steps indicator */}
-          <div className="hidden sm:flex items-center gap-1 text-[10px] font-mono">
-            <span className={`px-2 py-1 rounded border ${imagePath ? "text-emerald-400 bg-emerald-950/30 border-emerald-800/40" : "text-gray-600 border-gray-800"}`}>
-              1 Upload
+          <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono tracking-wider">
+            <span className={`px-2.5 py-1 rounded-lg border ${imagePath ? "text-slate-850 bg-white/60 border-white/80 font-bold shadow-sm" : "text-slate-500/40 border-slate-500/10"}`}>
+              1 UPLOAD
             </span>
-            <span className="text-gray-700">›</span>
-            <span className={`px-2 py-1 rounded border ${analysis ? "text-indigo-400 bg-indigo-950/30 border-indigo-800/40" : "text-gray-600 border-gray-800"}`}>
-              2 Analyze
+            <span className="text-slate-400">›</span>
+            <span className={`px-2.5 py-1 rounded-lg border ${analysis ? "text-slate-850 bg-white/60 border-white/80 font-bold shadow-sm" : "text-slate-500/40 border-slate-500/10"}`}>
+              2 ANALYZE
             </span>
-            <span className="text-gray-700">›</span>
-            <span className={`px-2 py-1 rounded border ${modelPath ? "text-violet-400 bg-violet-950/30 border-violet-800/40" : "text-gray-600 border-gray-800"}`}>
-              3 Generate
+            <span className="text-slate-400">›</span>
+            <span className={`px-2.5 py-1 rounded-lg border ${modelPath ? "text-slate-850 bg-white/60 border-white/80 font-bold shadow-sm" : "text-slate-500/40 border-slate-500/10"}`}>
+              3 GENERATE
             </span>
           </div>
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500 bg-gray-900/50 border border-gray-900 px-3 py-1 rounded-md">
-            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-            <span>GPU-Priority</span>
+          <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-700 bg-white/45 border border-white/50 px-3 py-1.5 rounded-xl backdrop-blur-sm shadow-sm">
+            <Cpu className="w-3.5 h-3.5 text-slate-500 animate-pulse" />
+            <span className="font-medium tracking-wide">GPU-Priority</span>
           </div>
         </div>
       </header>
 
-      {/* Main Grid Workspace — fixed height, no scroll */}
-      <main style={{ flex: 1, minHeight: 0, display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: "1rem", padding: "1rem", overflow: "hidden" }}>
+      {/* Main Grid Workspace */}
+      <main className="relative z-10 flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 overflow-hidden">
         
         {/* Left Panel: Controls */}
-        <section style={{ minHeight: 0, minWidth: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.75rem" }} className="custom-scrollbar pr-1">
+        <section className="lg:col-span-5 min-h-0 min-w-0 overflow-y-auto flex flex-col gap-4 custom-scrollbar pr-1">
           
           {/* Card 1: Upload & Preview */}
-          <div className="p-3.5 rounded-xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
-                <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="p-5 rounded-2xl bg-white/40 border border-white/50 backdrop-blur-xl shadow-lg shadow-slate-200/50 flex-shrink-0">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-podium font-bold uppercase tracking-wider text-xs text-slate-850 flex items-center gap-2">
+                <ImageIcon className="w-3.5 h-3.5 text-slate-500/60" />
                 1. Upload Source Image
               </h2>
               {imagePath && (
-                <span className="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" /> Loaded
+                <span className="text-[9px] text-emerald-700 bg-emerald-100/60 border border-emerald-300/60 px-2.5 py-0.5 rounded-full flex items-center gap-1 font-bold font-mono">
+                  <CheckCircle className="w-3 h-3" /> LOADED
                 </span>
               )}
             </div>
@@ -404,10 +418,10 @@ export default function Dashboard() {
               onDragLeave={handleDrag}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-3 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[95px] ${
+              className={`border border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center min-h-[110px] ${
                 dragActive 
-                  ? "border-cyan-500 bg-cyan-950/20 shadow-lg shadow-cyan-500/5" 
-                  : "border-gray-800 hover:border-gray-700 bg-gray-950/40 hover:bg-gray-950/60"
+                  ? "border-slate-500 bg-white/60" 
+                  : "border-slate-300 hover:border-slate-400 bg-white/20 hover:bg-white/35"
               }`}
             >
               <input
@@ -420,79 +434,79 @@ export default function Dashboard() {
               
               {uploadMutation.isPending ? (
                 <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
-                  <p className="text-xs text-gray-400">Uploading...</p>
+                  <Loader2 className="w-5 h-5 text-slate-500 animate-spin" />
+                  <p className="text-[10px] text-slate-650 font-semibold font-mono">Uploading...</p>
                 </div>
               ) : imagePath ? (
-                <div className="relative w-full max-h-[85px] flex items-center justify-center overflow-hidden rounded-lg">
+                <div className="relative w-full max-h-[100px] flex items-center justify-center overflow-hidden rounded-lg">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imagePath}
                     alt="Preview"
-                    className="max-h-[75px] max-w-full object-contain rounded-lg shadow-md border border-gray-800"
+                    className="max-h-[90px] max-w-full object-contain rounded-md shadow-md border border-white/5"
                   />
-                  <div className="absolute inset-0 bg-gray-950/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                    <span className="text-[10px] bg-gray-900 border border-gray-800 px-3 py-1 rounded-lg text-gray-300 font-semibold">
+                  <div className="absolute inset-0 bg-black/70 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center rounded-md">
+                    <span className="text-[10px] bg-slate-900 border border-white/10 px-3 py-1.5 rounded-lg text-white font-semibold">
                       Change Image
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-400">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="p-2.5 rounded-lg bg-white/40 border border-white/60 text-slate-650 shadow-sm">
                     <Upload className="w-3.5 h-3.5" />
                   </div>
-                  <p className="text-xs text-gray-300 font-medium">
-                    Drop image here or <span className="text-cyan-400">browse</span>
+                  <p className="text-xs text-slate-800 font-medium">
+                    Drop image here or <span className="text-slate-950 font-bold hover:underline">browse</span>
                   </p>
-                  <p className="text-[10px] text-gray-500 font-mono">PNG, JPG, WEBP • Max 10MB</p>
+                  <p className="text-[9px] text-slate-500/80 font-mono">PNG, JPG, WEBP • Max 10MB</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Card 2: AI Image Analysis */}
-          <div className="p-3.5 rounded-xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <div className="p-5 rounded-2xl bg-white/40 border border-white/50 backdrop-blur-xl shadow-lg shadow-slate-200/50 flex-shrink-0">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-podium font-bold uppercase tracking-wider text-xs text-slate-850 flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-slate-500/60" />
                 2. AI Vision Analysis
               </h2>
               {analysis && (
-                <span className={`text-[10px] border px-2 py-0.5 rounded-full flex items-center gap-1 ${sourceBadge.color}`}>
-                  <Eye className="w-2.5 h-2.5" /> {sourceBadge.label}
+                <span className={`text-[10px] border px-2 py-0.5 rounded font-bold font-mono ${sourceBadge.color}`}>
+                  <Eye className="w-3 h-3" /> {sourceBadge.label.toUpperCase()}
                 </span>
               )}
             </div>
 
             {!imagePath ? (
-              <div className="p-3 rounded-xl border border-gray-900 bg-gray-950/40 text-center py-4 text-xs text-gray-500 flex items-center justify-center gap-2">
+              <div className="p-4 rounded-xl border border-white/40 bg-white/20 text-center py-6 text-xs text-slate-500 flex items-center justify-center gap-2 font-medium shadow-inner">
                 <Clock className="w-3.5 h-3.5" />
                 Upload an image to begin analysis
               </div>
             ) : analyzeMutation.isPending ? (
-              <div className="p-3 rounded-xl border border-indigo-900/30 bg-indigo-950/10 text-center py-4 text-xs text-indigo-400 flex flex-col items-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>AI Vision analyzing your image...</span>
-                <span className="text-[10px] text-gray-500">Reading shape, materials & geometry...</span>
+              <div className="p-4 rounded-xl border border-white/40 bg-white/20 text-center py-6 text-xs text-slate-700 flex flex-col items-center gap-3 shadow-inner">
+                <Loader2 className="w-4 h-4 animate-spin text-slate-650" />
+                <span className="font-semibold text-xs">AI Vision analyzing your image...</span>
+                <span className="text-[10px] text-slate-500 font-mono">Reading shape, materials & geometry...</span>
               </div>
             ) : !analysis ? (
               <button
                 onClick={() => analyzeMutation.mutate(imagePath)}
-                className="w-full py-2 px-3 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all"
+                className="w-full py-2.5 px-4 rounded-xl font-bold bg-slate-900 text-white hover:bg-slate-800 hover:scale-[1.01] text-xs flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer shadow-md"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 Analyze Image with AI Vision
               </button>
             ) : (
-              <div className="flex flex-col gap-1.5">
-                <div className="bg-gray-950/80 border border-gray-800/50 p-2.5 rounded-xl max-h-[75px] overflow-y-auto font-mono text-[10px] leading-relaxed text-gray-300 custom-scrollbar select-text whitespace-pre-wrap">
+              <div className="flex flex-col gap-2">
+                <div className="bg-white/35 border border-white/55 p-3.5 rounded-xl max-h-[95px] overflow-y-auto font-mono text-[10px] leading-relaxed text-slate-755 custom-scrollbar select-text whitespace-pre-wrap shadow-inner">
                   {analysis}
                 </div>
                 <button
                   onClick={() => analyzeMutation.mutate(imagePath)}
                   disabled={analyzeMutation.isPending}
-                  className="text-right text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold self-end flex items-center gap-1"
+                  className="text-right text-[10px] text-slate-500 hover:text-slate-800 font-semibold self-end flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <RefreshCw className="w-2.5 h-2.5" /> Re-analyze
                 </button>
@@ -501,36 +515,36 @@ export default function Dashboard() {
           </div>
 
           {/* Card 3: 3D Generation */}
-          <div className="p-3.5 rounded-xl bg-gray-900/40 border border-gray-800/80 backdrop-blur-sm flex-shrink-0">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2 mb-2">
-              <Box className="w-3.5 h-3.5 text-violet-400" />
+          <div className="p-5 rounded-2xl bg-white/40 border border-white/50 backdrop-blur-xl shadow-lg shadow-slate-200/50 flex-shrink-0">
+            <h2 className="font-podium font-bold uppercase tracking-wider text-xs text-slate-850 flex items-center gap-2 mb-3">
+              <Box className="w-3.5 h-3.5 text-slate-500/60" />
               3. Generate 3D Model
             </h2>
 
             {!imagePath ? (
-              <div className="p-3 rounded-xl border border-gray-900 bg-gray-950/40 text-center py-4 text-xs text-gray-500 flex items-center justify-center gap-2">
+              <div className="p-4 rounded-xl border border-white/40 bg-white/20 text-center py-6 text-xs text-slate-500 flex items-center justify-center gap-2 font-medium shadow-inner">
                 <Clock className="w-3.5 h-3.5" />
                 Upload an image to enable generation
               </div>
             ) : (
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-3">
                 {/* Analysis connected indicator */}
                 {analysis && (
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-950/20 border border-emerald-800/30">
-                    <Zap className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                    <span className="text-[10px] text-emerald-300 leading-tight">
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/50 border border-white/70 backdrop-blur-sm shadow-sm">
+                    <Zap className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 animate-pulse" />
+                    <span className="text-[10px] text-slate-700 leading-normal font-medium">
                       AI analysis connected — reconstruction guided by image content
                     </span>
                   </div>
                 )}
 
                 {/* Model Selector */}
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] text-gray-500 font-mono">Reconstruction Model:</span>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[10px] text-slate-500 font-mono">Reconstruction Model:</span>
                   <select
                     value={modelType}
                     onChange={(e) => setModelType(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs font-mono text-cyan-400 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-white/60 border border-white/70 hover:border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:border-slate-400 transition-colors cursor-pointer shadow-sm"
                   >
                     <option value="local-gpu">💻 Local GPU — TripoSR (NVIDIA CUDA)</option>
                     <option value="tripo-api">🔥 SOTA Commercial — Tripo AI API</option>
@@ -540,14 +554,14 @@ export default function Dashboard() {
                   </select>
 
                   {modelType === "local-gpu" && (
-                    <div className="mt-2 p-2 rounded-lg bg-cyan-950/20 border border-cyan-800/30 flex flex-col gap-1.5">
-                      <span className="text-[9px] text-cyan-400/80 font-mono leading-relaxed">
+                    <div className="mt-2.5 p-3.5 rounded-xl bg-white/20 border border-white/40 backdrop-blur-sm flex flex-col gap-2.5 shadow-inner">
+                      <span className="text-[9.5px] text-slate-600 font-mono leading-relaxed">
                         Pertama kali menggunakan Local GPU? Unduh installer ini untuk mengaktifkan dukungan CUDA di PC Anda secara otomatis.
                       </span>
                       <a
                         href="/install_cuda_deps.bat"
                         download="install_cuda_deps.bat"
-                        className="px-2.5 py-1 text-center rounded bg-cyan-950 hover:bg-cyan-900 border border-cyan-800 text-[10px] text-cyan-400 font-bold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-cyan-950/30"
+                        className="px-3 py-2 text-center rounded-xl bg-white/60 border border-white/75 hover:bg-white/85 text-slate-800 hover:text-slate-950 text-[10px] font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm backdrop-blur-sm"
                       >
                         <Download className="w-3.5 h-3.5" />
                         Unduh Script Setup GPU (.bat)
@@ -559,16 +573,16 @@ export default function Dashboard() {
                 <button
                   onClick={() => generateMutation.mutate(imagePath)}
                   disabled={generateMutation.isPending || !imagePath}
-                  className="w-full py-2.5 px-4 rounded-xl font-bold bg-gradient-to-r from-cyan-500 to-indigo-500 text-white hover:from-cyan-400 hover:to-indigo-400 disabled:from-gray-800 disabled:to-gray-800 disabled:text-gray-500 transition-all text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/10"
+                  className="w-full py-2.5 px-4 rounded-xl font-bold bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 transition-all duration-300 text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
                 >
                   {generateMutation.isPending ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                       Generating 3D...
                     </>
                   ) : (
                     <>
-                      <Play className="w-4 h-4 fill-current" />
+                      <Play className="w-3.5 h-3.5 fill-current" />
                       Generate 3D Model
                     </>
                   )}
@@ -576,20 +590,36 @@ export default function Dashboard() {
 
                 {/* Console Logs */}
                 {consoleLogs.length > 0 && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-gray-500 font-mono flex items-center gap-1.5">
-                      <Terminal className="w-3 h-3 text-cyan-500" />
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] text-slate-500 font-mono flex items-center gap-1.5">
+                      <Terminal className="w-3.5 h-3.5 text-slate-500/70" />
                       Pipeline Logs:
                     </span>
                     <div 
                       ref={logContainerRef}
-                      className="bg-gray-950 border border-gray-900 p-2.5 rounded-lg font-mono text-[10px] text-cyan-500/90 h-[140px] overflow-y-auto flex flex-col gap-0.5 custom-scrollbar scroll-smooth"
+                      className="bg-white/30 border border-white/55 p-3.5 rounded-xl font-mono text-[10px] text-slate-700 h-[120px] overflow-y-auto flex flex-col gap-1 custom-scrollbar scroll-smooth shadow-inner"
                     >
-                      {consoleLogs.map((log, index) => (
-                        <div key={index} className="leading-normal break-all">{log}</div>
-                      ))}
+                      {consoleLogs.map((log, index) => {
+                        const isSystem = log.startsWith("[SYSTEM]");
+                        const isError = log.startsWith("[CRITICAL ERROR]");
+                        const isSuccess = log.startsWith("[SUCCESS]");
+                        const isWarning = log.startsWith("[WARNING]");
+                        return (
+                          <div 
+                            key={index} 
+                            className={`leading-normal break-all ${
+                              isSystem ? "text-slate-900 font-semibold" :
+                              isError ? "text-rose-600 font-bold" :
+                              isSuccess ? "text-emerald-600 font-semibold" :
+                              isWarning ? "text-amber-600 font-semibold" : ""
+                            }`}
+                          >
+                            {log}
+                          </div>
+                        );
+                      })}
                       {generateMutation.isPending && (
-                        <div className="text-cyan-500/60 animate-pulse flex items-center gap-1">
+                        <div className="text-slate-550/65 animate-pulse flex items-center gap-1">
                           <span>█</span><span>Processing pipeline...</span>
                         </div>
                       )}
@@ -602,40 +632,39 @@ export default function Dashboard() {
         </section>
 
         {/* Right Panel: 3D Viewer */}
-        <section style={{ minHeight: 0, minWidth: 0, overflow: "hidden", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          <div className="flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <Box className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-sm font-bold text-gray-200">3D Workspace Viewport</h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                ref={glbInputRef}
-                type="file"
-                className="hidden"
-                accept=".glb"
-                onChange={handleGlbImport}
-              />
+        <section className="lg:col-span-7 min-h-0 min-w-0 flex flex-col h-full">
+          {/* Viewport container */}
+          <div className="flex-1 min-h-0 bg-white/30 border border-white/50 rounded-3xl relative overflow-hidden backdrop-blur-xl shadow-lg shadow-slate-200/50">
+            <input
+              ref={glbInputRef}
+              type="file"
+              className="hidden"
+              accept=".glb"
+              onChange={handleGlbImport}
+            />
+
+            {/* Floating Viewport Controls */}
+            <div className="absolute top-4 right-4 z-20 flex items-center gap-2 select-none">
               <button
                 onClick={() => glbInputRef.current?.click()}
-                className="px-3 py-1.5 text-xs font-bold rounded-xl bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-300 hover:text-white transition-all flex items-center gap-1.5"
+                className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-white/65 border border-white/85 hover:bg-white/85 text-slate-700 hover:text-slate-955 transition-all duration-300 flex items-center gap-1.5 cursor-pointer backdrop-blur-md shadow-sm"
                 title="Import local GLB file for visual inspection"
               >
-                <Upload className="w-3.5 h-3.5 text-cyan-400" />
+                <Upload className="w-3.5 h-3.5 text-slate-500" />
                 Import GLB
               </button>
               {modelPath && (
                 <>
                   <button
                     onClick={handleDownload}
-                    className="px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg hover:shadow-emerald-500/20 hover:from-emerald-400 hover:to-teal-400 transition-all flex items-center gap-1.5 border border-emerald-500/20"
+                    className="px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-md transition-all duration-300 flex items-center gap-1.5 cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                     Download GLB
                   </button>
                   <button
                     onClick={handleClearModel}
-                    className="px-3 py-1.5 text-xs font-bold rounded-xl bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-900/40 transition-all"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-white/65 border border-white/85 hover:bg-white/85 text-slate-655 hover:text-slate-955 transition-all duration-300 cursor-pointer backdrop-blur-md shadow-sm"
                     title="Clear model viewer"
                   >
                     Reset
@@ -643,21 +672,144 @@ export default function Dashboard() {
                 </>
               )}
             </div>
-          </div>
 
-          {/* Viewport container — fills remaining height */}
-          <div style={{ flex: 1, minHeight: 0 }} className="bg-gray-900/20 rounded-2xl border border-gray-800/80 backdrop-blur-sm relative overflow-hidden">
             {modelPath ? (
               <ModelViewer modelPath={modelPath} />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center select-none pointer-events-none">
-                <div className="relative w-20 h-20 mb-5 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-2xl border border-gray-800 bg-gray-950/50 shadow-inner" />
-                  <div className="absolute inset-4 rounded-xl border border-dashed border-gray-700/50 animate-spin [animation-duration:15s]" />
-                  <Box className="w-7 h-7 text-gray-600 z-10" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center select-none pointer-events-none z-10">
+                {/* Professional 3D Grid Floor */}
+                <div 
+                  className="absolute inset-0 perspective-grid-floor z-0" 
+                  style={{
+                    backgroundImage: "linear-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, 0.08) 1px, transparent 1px)"
+                  }}
+                />
+
+                {/* Holographic Volumetric Atmosphere Glow */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.5)_0%,transparent_70%)] pointer-events-none z-0" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(255,255,255,0.6)_0%,transparent_80%)] pointer-events-none z-0" />
+
+                {/* Volumetric Holographic Projection Cone */}
+                <div 
+                  className="absolute bottom-[20%] left-1/2 -translate-x-1/2 w-64 h-56 bg-gradient-to-t from-white/35 to-transparent pointer-events-none z-0" 
+                  style={{ clipPath: "polygon(35% 0%, 65% 0%, 0% 100%, 100% 100%)" }}
+                />
+
+                {/* Scanner projection base ring on the floor */}
+                <div 
+                  className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-64 h-12 rounded-full border border-slate-350 bg-white/25 pointer-events-none z-0 animate-pulse" 
+                  style={{ transform: "perspective(300px) rotateX(75deg)" }}
+                />
+                <div 
+                  className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-44 h-8 rounded-full border border-slate-200 pointer-events-none z-0 animate-ping [animation-duration:4s]" 
+                  style={{ transform: "perspective(300px) rotateX(75deg)" }}
+                />
+
+                {/* Holographic scanning particles rising from the base */}
+                <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-64 h-48 overflow-hidden pointer-events-none z-0">
+                  {[...Array(12)].map((_, i) => {
+                    const size = (i % 3) + 1.2; // 1.2px to 3.2px
+                    const left = 15 + (i * 6.5); // spread from 15% to 90%
+                    const delay = (i * 0.45).toFixed(2);
+                    const duration = (4.0 + (i % 4) * 0.9).toFixed(2);
+                    return (
+                      <div
+                        key={i}
+                        className="absolute bg-slate-400/35 rounded-full animate-particle-float"
+                        style={{
+                          width: `${size}px`,
+                          height: `${size}px`,
+                          left: `${left}%`,
+                          bottom: "0px",
+                          animationDelay: `${delay}s`,
+                          animationDuration: `${duration}s`,
+                        }}
+                      />
+                    );
+                  })}
                 </div>
-                <h3 className="text-sm font-bold text-gray-300 mb-2">Awaiting 3D Generation</h3>
-                <p className="text-xs text-gray-500 leading-relaxed max-w-xs">
+
+                {/* Central Holographic Chamber Element (Rotating Wireframe) */}
+                <div className="relative w-64 h-64 flex items-center justify-center z-10 animate-holo-rotate">
+                  <svg width="220" height="220" viewBox="0 0 100 100" className="text-slate-800/20 select-none">
+                    {/* Outer dashed radar ring */}
+                    <ellipse cx="50" cy="50" rx="46" ry="14" fill="none" stroke="rgba(30, 41, 59, 0.12)" strokeWidth="0.6" strokeDasharray="4, 4" />
+                    
+                    {/* Inner solid and dotted orbit rings */}
+                    <ellipse cx="50" cy="50" rx="38" ry="10" fill="none" stroke="rgba(30, 41, 59, 0.18)" strokeWidth="0.5" />
+                    <ellipse cx="50" cy="50" rx="26" ry="7" fill="none" stroke="rgba(30, 41, 59, 0.12)" strokeWidth="0.5" strokeDasharray="1, 2" />
+                    
+                    {/* High-tech grid ticks / markings */}
+                    <line x1="10" y1="50" x2="14" y2="50" stroke="rgba(30, 41, 59, 0.25)" strokeWidth="0.5" />
+                    <line x1="86" y1="50" x2="90" y2="50" stroke="rgba(30, 41, 59, 0.25)" strokeWidth="0.5" />
+                    
+                    {/* Wireframe Polyhedron Structure */}
+                    <polygon points="50,12 28,38 50,48" fill="rgba(30, 41, 59, 0.02)" stroke="rgba(30, 41, 59, 0.25)" strokeWidth="0.8" />
+                    <polygon points="50,12 50,48 72,38" fill="none" stroke="rgba(30, 41, 59, 0.15)" strokeWidth="0.7" />
+                    <polygon points="50,12 72,38 78,50" fill="rgba(30, 41, 59, 0.01)" stroke="rgba(30, 41, 59, 0.15)" strokeWidth="0.7" strokeDasharray="2, 1" />
+                    <polygon points="50,12 28,38 22,50" fill="none" stroke="rgba(30, 41, 59, 0.12)" strokeWidth="0.7" />
+                    
+                    {/* Mid-body facets */}
+                    <polygon points="28,38 50,48 50,56" fill="none" stroke="rgba(30, 41, 59, 0.12)" strokeWidth="0.7" />
+                    <polygon points="50,48 72,38 78,50" fill="rgba(30, 41, 59, 0.02)" stroke="rgba(30, 41, 59, 0.2)" strokeWidth="0.8" />
+                    <polygon points="72,38 50,48 50,56" fill="none" stroke="rgba(30, 41, 59, 0.12)" strokeWidth="0.7" />
+                    <polygon points="28,38 50,48 22,50" fill="none" stroke="rgba(30, 41, 59, 0.12)" strokeWidth="0.7" strokeDasharray="2, 2" />
+                    
+                    {/* Lower cone facet paths */}
+                    <polygon points="50,88 28,62 50,52" fill="none" stroke="rgba(30, 41, 59, 0.15)" strokeWidth="0.7" />
+                    <polygon points="50,88 50,52 72,62" fill="rgba(30, 41, 59, 0.02)" stroke="rgba(30, 41, 59, 0.2)" strokeWidth="0.8" />
+                    <polygon points="50,88 72,62 78,50" fill="none" stroke="rgba(30, 41, 59, 0.1)" strokeWidth="0.7" strokeDasharray="2, 1" />
+                    <polygon points="50,88 28,62 22,50" fill="none" stroke="rgba(30, 41, 59, 0.12)" strokeWidth="0.7" />
+                    
+                    {/* Central core energy spheres */}
+                    <circle cx="50" cy="50" r="2.0" fill="#475569" className="animate-pulse" />
+                    <circle cx="50" cy="50" r="4" fill="none" stroke="rgba(71, 85, 105, 0.3)" strokeWidth="0.7" className="animate-ping [animation-duration:2s]" />
+ 
+                    {/* Vertices & Nodes */}
+                    <circle cx="50" cy="12" r="1.6" fill="#475569" />
+                    <circle cx="50" cy="88" r="1.6" fill="#475569" style={{ opacity: 0.85 }} />
+                    <circle cx="28" cy="38" r="1.4" fill="#475569" style={{ opacity: 0.85 }} />
+                    <circle cx="72" cy="38" r="1.6" fill="#475569" />
+                    <circle cx="28" cy="62" r="1.6" fill="#475569" />
+                    <circle cx="72" cy="62" r="1.4" fill="#475569" style={{ opacity: 0.85 }} />
+                    
+                    {/* Technical text labels pointing to coordinates */}
+                    <text x="53" y="16" fill="rgba(71, 85, 105, 0.4)" fontSize="3.5" fontFamily="monospace">[v_001]</text>
+                    <text x="74" y="36" fill="rgba(71, 85, 105, 0.4)" fontSize="3.5" fontFamily="monospace">x_lock</text>
+                    <text x="12" y="65" fill="rgba(71, 85, 105, 0.3)" fontSize="3.5" fontFamily="monospace">[rec_init]</text>
+                    <line x1="24" y1="63" x2="28" y2="62" stroke="rgba(71, 85, 105, 0.3)" strokeWidth="0.6" />
+                  </svg>
+                </div>
+                
+                {/* XYZ 3D Axis helper widget */}
+                <div className="absolute bottom-4 left-4 flex items-center gap-3 bg-white/50 border border-white/75 px-3.5 py-2.5 rounded-2xl backdrop-blur-xl z-10 select-none shadow-md">
+                  <svg width="30" height="30" viewBox="0 0 32 32" className="text-white/40">
+                    <circle cx="16" cy="18" r="1.2" fill="#a1a1aa" />
+                    
+                    {/* Y-Axis: Up (Green) */}
+                    <line x1="16" y1="18" x2="16" y2="4" stroke="#10b981" strokeWidth="1.2" strokeLinecap="round" />
+                    <polygon points="15,5 16,2 17,5" fill="#10b981" />
+                    <text x="19" y="7" fill="#10b981" fontSize="5" fontFamily="monospace" fontWeight="bold">Y</text>
+                    
+                    {/* X-Axis: Right-Forward (Red) */}
+                    <line x1="16" y1="18" x2="28" y2="18" stroke="#ef4444" strokeWidth="1.2" strokeLinecap="round" />
+                    <polygon points="27,17 30,18 27,19" fill="#ef4444" />
+                    <text x="26" y="15" fill="#ef4444" fontSize="5" fontFamily="monospace" fontWeight="bold">X</text>
+                    
+                    {/* Z-Axis: Diagonal (Blue) */}
+                    <line x1="16" y1="18" x2="8" y2="26" stroke="#3b82f6" strokeWidth="1.2" strokeLinecap="round" />
+                    <polygon points="7.5,24 5.5,28.5 10,26.5" fill="#3b82f6" />
+                    <text x="5" y="22" fill="#3b82f6" fontSize="5" fontFamily="monospace" fontWeight="bold">Z</text>
+                  </svg>
+                  <div className="font-mono text-[9px] text-slate-600 flex flex-col gap-0.5 border-l border-slate-350 pl-2.5 items-start">
+                    <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> X: +0.000</div>
+                    <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Y: +0.000</div>
+                    <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Z: +0.000</div>
+                  </div>
+                </div>
+
+                <h3 className="font-podium font-bold uppercase tracking-wider text-sm text-slate-900 mb-2 mt-4 z-10">Awaiting 3D Generation</h3>
+                <p className="text-xs text-slate-600 leading-relaxed max-w-xs font-normal z-10">
                   {!imagePath 
                     ? "Upload a source image to get started. AI Vision will analyze it automatically."
                     : !analysis 
@@ -667,20 +819,20 @@ export default function Dashboard() {
                 </p>
 
                 {/* Pipeline progress visual */}
-                <div className="mt-6 flex items-center gap-2 text-[10px] font-mono">
-                  <span className={`px-2.5 py-1 rounded-full border ${imagePath ? "text-emerald-400 bg-emerald-950/30 border-emerald-800/40" : "text-gray-600 border-gray-800"}`}>
-                    {imagePath ? "✓ Uploaded" : "① Upload"}
+                <div className="mt-6 flex items-center gap-2 text-[10px] font-mono tracking-wider font-bold z-10">
+                  <span className={`px-2.5 py-1.5 rounded-lg border ${imagePath ? "text-slate-800 bg-white/60 border-white/70 shadow-sm" : "text-slate-450 border-slate-500/10"}`}>
+                    {imagePath ? "✓ UPLOADED" : "① UPLOAD"}
                   </span>
-                  <span className="text-gray-700">→</span>
-                  <span className={`px-2.5 py-1 rounded-full border ${
-                    analyzeMutation.isPending ? "text-indigo-300 bg-indigo-950/30 border-indigo-700/40 animate-pulse" : 
-                    analysis ? "text-indigo-400 bg-indigo-950/30 border-indigo-800/40" : "text-gray-600 border-gray-800"
+                  <span className="text-slate-400">→</span>
+                  <span className={`px-2.5 py-1.5 rounded-lg border ${
+                    analyzeMutation.isPending ? "text-slate-800 bg-white/60 border-white/70 shadow-sm animate-pulse" : 
+                    analysis ? "text-slate-800 bg-white/60 border-white/70 shadow-sm" : "text-slate-450 border-slate-500/10"
                   }`}>
-                    {analyzeMutation.isPending ? "⟳ Analyzing..." : analysis ? "✓ Analyzed" : "② Analyze"}
+                    {analyzeMutation.isPending ? "⟳ ANALYZING..." : analysis ? "✓ ANALYZED" : "② ANALYZE"}
                   </span>
-                  <span className="text-gray-700">→</span>
-                  <span className={`px-2.5 py-1 rounded-full border ${modelPath ? "text-violet-400 bg-violet-950/30 border-violet-800/40" : "text-gray-600 border-gray-800"}`}>
-                    {modelPath ? "✓ Generated" : "③ Generate"}
+                  <span className="text-slate-400">→</span>
+                  <span className={`px-2.5 py-1.5 rounded-lg border ${modelPath ? "text-slate-800 bg-white/60 border-white/70 shadow-sm" : "text-slate-450 border-slate-500/10"}`}>
+                    {modelPath ? "✓ GENERATED" : "③ GENERATE"}
                   </span>
                 </div>
               </div>

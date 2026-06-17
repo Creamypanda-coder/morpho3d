@@ -10,3 +10,7 @@ TripoSR
 # Scratch and test files
 scratch
 test_output.glb
+
+# Local source video and music directories (duplicated in public/)
+/VIDEO
+/MUSIC

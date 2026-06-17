@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="grad-cyan-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#d946ef" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Background Circle (dark, premium) -->
+  <rect width="512" height="512" rx="128" fill="#030014" />
+  <rect width="504" height="504" x="4" y="4" rx="124" stroke="url(#grad-cyan-purple)" stroke-width="8" opacity="0.3" />
+  
+  <!-- Stylized 3D Isometric Cube -->
+  <g transform="translate(256, 256) scale(1.6)" filter="url(#glow)">
+    <!-- Left Face -->
+    <path d="M0,0 L-80,-46 L-80,46 L0,92 Z" fill="#6366f1" opacity="0.8" />
+    <!-- Right Face -->
+    <path d="M0,0 L80,-46 L80,46 L0,92 Z" fill="#d946ef" opacity="0.8" />
+    <!-- Top Face -->
+    <path d="M0,0 L-80,-46 L0,-92 L80,-46 Z" fill="#06b6d4" />
+    
+    <!-- Inner Grid Lines for 3D Mesh look -->
+    <path d="M-40,-23 L0,0 M40,-23 L0,0 M0,46 L0,0" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+    <path d="M-80,-46 L0,-92 L80,-46 L0,0 Z" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" opacity="0.4" />
+    <path d="M-80,46 L0,92 L80,46 L0,0 Z" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" opacity="0.4" />
+  </g>
+</svg>

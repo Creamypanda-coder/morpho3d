@@ -183,12 +183,10 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     }
   };
 
-
-
   const bgClasses = {
-    dark: "bg-gradient-to-b from-gray-950 to-gray-900 border-gray-800 text-gray-100",
-    black: "bg-black border-gray-900 text-gray-100",
-    gray: "bg-gray-800 border-gray-700 text-gray-100",
+    dark: "bg-[#0a0a0d] border-white/[0.04] text-[#d4d4d8]",
+    black: "bg-black border-neutral-900 text-[#d4d4d8]",
+    gray: "bg-neutral-900 border-white/[0.04] text-[#d4d4d8]",
     white: "bg-white border-gray-200 text-gray-900",
   };
 
@@ -203,13 +201,13 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     >
       {/* Loading */}
       {loading && !loadingError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-950/80 backdrop-blur-sm z-30">
-          <div className="relative w-16 h-16">
-            <div className="absolute inset-0 rounded-full border-4 border-cyan-500/20 border-t-cyan-400 animate-spin" />
-            <div className="absolute inset-2 rounded-full border-4 border-violet-500/10 border-t-violet-400 animate-spin [animation-duration:1.5s]" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md z-30">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-2 border-white/5 border-t-red-500 animate-spin" />
+            <div className="absolute inset-2 rounded-full border-2 border-white/5 border-t-neutral-500 animate-spin [animation-duration:1.5s]" />
           </div>
-          <p className="mt-4 text-cyan-400 font-medium text-xs tracking-wider animate-pulse flex items-center gap-2 font-mono">
-            <Activity className="w-4 h-4 animate-bounce" /> RENDERING 3D MESH...
+          <p className="mt-4 text-red-400 font-mono text-[10px] tracking-widest animate-pulse flex items-center gap-2 font-semibold">
+            <Activity className="w-3.5 h-3.5 animate-bounce" /> RENDERING 3D MESH...
           </p>
         </div>
       )}
@@ -285,21 +283,21 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
       </div>
 
       {/* Toolbar */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1.5 bg-gray-900/90 border border-gray-800/80 backdrop-blur-xl rounded-full shadow-2xl z-20">
-        <button onClick={handleResetCamera} className="p-2.5 rounded-full text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 transition-all" title="Reset Camera">
-          <RefreshCw className="w-4 h-4" />
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1 bg-[#050507]/90 border border-white/[0.08] backdrop-blur-xl rounded-xl shadow-2xl z-20">
+        <button onClick={handleResetCamera} className="p-2 rounded-lg text-neutral-450 hover:text-red-400 hover:bg-white/5 transition-all" title="Reset Camera">
+          <RefreshCw className="w-3.5 h-3.5" />
         </button>
         <button onClick={() => setWireframe(!wireframe)} title="Wireframe"
-          className={`p-2.5 rounded-full transition-all ${wireframe ? "text-cyan-400 bg-cyan-950/40 border border-cyan-500/20" : "text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 border border-transparent"}`}>
-          <Grid3X3 className="w-4 h-4" />
+          className={`p-2 rounded-lg transition-all ${wireframe ? "text-red-400 bg-red-950/20 border border-red-500/25" : "text-neutral-450 hover:text-red-400 hover:bg-white/5 border border-transparent"}`}>
+          <Grid3X3 className="w-3.5 h-3.5" />
         </button>
         <button onClick={() => setAutoRotate(!autoRotate)} title="Auto Rotate"
-          className={`p-2.5 rounded-full transition-all ${autoRotate ? "text-cyan-400 bg-cyan-950/40 border border-cyan-500/20" : "text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 border border-transparent"}`}>
-          <Rotate3d className="w-4 h-4" />
+          className={`p-2 rounded-lg transition-all ${autoRotate ? "text-red-400 bg-red-950/20 border border-red-500/25" : "text-neutral-450 hover:text-red-400 hover:bg-white/5 border border-transparent"}`}>
+          <Rotate3d className="w-3.5 h-3.5" />
         </button>
         <button onClick={() => setShowGrid(!showGrid)} title="Grid"
-          className={`p-2.5 rounded-full transition-all ${showGrid ? "text-cyan-400 bg-cyan-950/40 border border-cyan-500/20" : "text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 border border-transparent"}`}>
-          {showGrid ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+          className={`p-2 rounded-lg transition-all ${showGrid ? "text-red-400 bg-red-950/20 border border-red-500/25" : "text-neutral-450 hover:text-red-400 hover:bg-white/5 border border-transparent"}`}>
+          {showGrid ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
         </button>
 
         {/* Color Palette Inline */}
@@ -308,15 +306,15 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
             onClick={() => setBgColor("dark")}
             title="Dark Background"
             className={`w-3.5 h-3.5 rounded-full border transition-all ${
-              bgColor === "dark" ? "border-cyan-400 scale-110 shadow-lg" : "border-gray-700 hover:border-gray-500"
+              bgColor === "dark" ? "border-red-500 scale-110 shadow-lg" : "border-neutral-700 hover:border-neutral-500"
             }`}
-            style={{ background: "linear-gradient(to bottom, #030712, #111827)" }}
+            style={{ backgroundColor: "#0a0a0d" }}
           />
           <button
             onClick={() => setBgColor("black")}
             title="Black Background"
             className={`w-3.5 h-3.5 rounded-full border transition-all ${
-              bgColor === "black" ? "border-cyan-400 scale-110 shadow-lg" : "border-gray-700 hover:border-gray-500"
+              bgColor === "black" ? "border-red-500 scale-110 shadow-lg" : "border-neutral-700 hover:border-neutral-500"
             }`}
             style={{ backgroundColor: "#000000" }}
           />
@@ -324,7 +322,7 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
             onClick={() => setBgColor("gray")}
             title="Gray Background"
             className={`w-3.5 h-3.5 rounded-full border transition-all ${
-              bgColor === "gray" ? "border-cyan-400 scale-110 shadow-lg" : "border-gray-700 hover:border-gray-500"
+              bgColor === "gray" ? "border-red-500 scale-110 shadow-lg" : "border-neutral-700 hover:border-neutral-500"
             }`}
             style={{ backgroundColor: "#4b5563" }}
           />
@@ -332,17 +330,15 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
             onClick={() => setBgColor("white")}
             title="White Background"
             className={`w-3.5 h-3.5 rounded-full border transition-all ${
-              bgColor === "white" ? "border-cyan-400 scale-110 shadow-lg" : "border-gray-400 hover:border-gray-600"
+              bgColor === "white" ? "border-red-500 scale-110 shadow-lg" : "border-neutral-400 hover:border-neutral-600"
             }`}
             style={{ backgroundColor: "#ffffff" }}
           />
         </div>
 
-
-
         <button onClick={handleToggleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-          className="p-2.5 rounded-full text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 transition-all border border-transparent">
-          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          className="p-2 rounded-lg text-neutral-450 hover:text-red-400 hover:bg-white/5 transition-all border border-transparent">
+          {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
         </button>
       </div>
 

@@ -22,12 +22,7 @@ export default function LandingPage() {
   const transitionTargetRef = useRef<'A' | 'B' | null>(null);
   const fadeDuration = 2; // Crossfade duration in seconds
 
-  const [currentSetIndex, setCurrentSetIndex] = useState(0);
-  const videoSets = [
-    { name: "SCENE 01", A: "/video/Background3.mp4", B: "/video/Background4.mp4" },
-    { name: "SCENE 02", A: "/video/Background2.mp4", B: "/video/Background2.mp4" },
-    { name: "SCENE 03", A: "/video/videoplayback.mp4", B: "/video/videoplayback.mp4" },
-  ];
+
 
   useEffect(() => {
     // Preload audio files
@@ -66,7 +61,7 @@ export default function LandingPage() {
       window.removeEventListener("keydown", unlockAudio);
     };
   }, []);
-  // Play Video A when the set changes or mounts
+  // Play Video A when the component mounts
   useEffect(() => {
     if (videoRefA.current) {
       videoRefA.current.load();
@@ -81,7 +76,7 @@ export default function LandingPage() {
     }
     setActiveVideo('A');
     transitionTargetRef.current = null;
-  }, [currentSetIndex]);
+  }, []);
 
   const handleTimeUpdate = (videoKey: 'A' | 'B') => {
     const currentVideo = videoKey === 'A' ? videoRefA.current : videoRefB.current;
@@ -189,7 +184,7 @@ export default function LandingPage() {
           autoPlay
           muted
           playsInline
-          src={videoSets[currentSetIndex].A}
+          src="/video/Background3.mp4"
           onPlay={() => setIsVideoLoaded(true)}
           onTimeUpdate={() => handleTimeUpdate('A')}
           onEnded={() => handleVideoEnded('A')}
@@ -205,7 +200,7 @@ export default function LandingPage() {
           ref={videoRefB}
           muted
           playsInline
-          src={videoSets[currentSetIndex].B}
+          src="/video/Background4.mp4"
           onPlay={() => setIsVideoLoaded(true)}
           onTimeUpdate={() => handleTimeUpdate('B')}
           onEnded={() => handleVideoEnded('B')}
@@ -475,18 +470,7 @@ export default function LandingPage() {
         <div className="h-[72px] sm:h-[88px] invisible pointer-events-none"></div>
       </div>
 
-      {/* Tiny Switch Video Button at the bottom */}
-      <button
-        onClick={() => {
-          playClickSound();
-          const nextIndex = (currentSetIndex + 1) % videoSets.length;
-          setCurrentSetIndex(nextIndex);
-        }}
-        onMouseEnter={playHoverSound}
-        className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 opacity-10 hover:opacity-85 transition-all duration-300 text-[9px] tracking-[0.2em] uppercase text-white/40 hover:text-white bg-black/45 border border-white/10 hover:border-white/30 px-2.5 py-1 rounded cursor-pointer select-none focus:outline-none"
-      >
-        SWITCH SCENE ({videoSets[currentSetIndex].name})
-      </button>
+
     </div>
   );
 }
